@@ -1,20 +1,35 @@
-import { useCallback, useEffect, useState } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
-import { ApiError, fetchAuditLogs, type AuditLogApiRow } from '@/lib/api'
+import { fetchAuditLogs } from '@/lib/api/audit'
+import { mapAuditRow } from '@/lib/mappers/audit'
 import type { AuditLog } from '@/types'
 import type { Column } from '@/components/ui/DataTable'
 import { DataTable } from '@/components/ui/DataTable'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { useAdminData } from '@/hooks/useAdminData'
+
+function AuditPayloadCell({ payload }: { payload: Record<string, unknown> | null }) {
+  if (!payload) {
+    return <span className="text-gray-400">—</span>
+  }
+  const compact = JSON.stringify(payload)
+  const preview = compact.length > 64 ? `${compact.slice(0, 64)}…` : compact
+  return (
+    <details className="max-w-xs text-xs">
+      <summary className="cursor-pointer list-none text-gray-600 marker:hidden hover:text-gray-900 [&::-webkit-details-marker]:hidden">
+        <span className="break-all font-mono">{preview}</span>
+      </summary>
+      <pre className="mt-2 max-h-48 overflow-auto rounded-md bg-gray-50 p-2 font-mono text-[11px] leading-relaxed whitespace-pre-wrap break-all text-gray-800">
+        {JSON.stringify(payload, null, 2)}
+      </pre>
+    </details>
+  )
+}
 
 const columns: Column<AuditLog>[] = [
   {
     key: 'createdAt',
     header: 'Fecha',
     render: (log) =>
-      new Date(log.createdAt).toLocaleString('es-CR', {
-        dateStyle: 'short',
-        timeStyle: 'short',
-      }),
+      new Date(log.createdAt).toLocaleString('es-CR', { dateStyle: 'short', timeStyle: 'short' }),
   },
   {
     key: 'action',
@@ -41,53 +56,12 @@ const columns: Column<AuditLog>[] = [
   {
     key: 'payload',
     header: 'Detalle',
-    render: (log) =>
-      log.payload ? (
-        <span className="text-xs text-gray-500">{JSON.stringify(log.payload)}</span>
-      ) : (
-        <span className="text-gray-400">—</span>
-      ),
+    render: (log) => <AuditPayloadCell payload={log.payload} />,
   },
 ]
 
-function mapRow(row: AuditLogApiRow): AuditLog {
-  return {
-    id: row.id,
-    action: row.action,
-    entityType: row.entityType,
-    entityId: row.entityId,
-    actorEmail: row.actor.email,
-    payload: row.payload,
-    createdAt: row.createdAt,
-  }
-}
-
 export function AuditLogPage() {
-  const { getIdToken, signOut } = useAuth()
-  const [rows, setRows] = useState<AuditLog[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  const load = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const data = await fetchAuditLogs(getIdToken)
-      setRows(data.map(mapRow))
-    } catch (e) {
-      if (e instanceof ApiError && e.status === 401) {
-        await signOut()
-        return
-      }
-      setError(e instanceof Error ? e.message : 'Error al cargar auditoría')
-    } finally {
-      setLoading(false)
-    }
-  }, [getIdToken, signOut])
-
-  useEffect(() => {
-    void load()
-  }, [load])
+  const { data: rows, loading, error } = useAdminData(fetchAuditLogs, mapAuditRow, 'Error al cargar auditoría')
 
   return (
     <>

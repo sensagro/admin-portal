@@ -1,5 +1,6 @@
 import { ClipboardList, LogOut, Radio, Users, type LucideIcon } from 'lucide-react'
 import type { PageId } from '@/types'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface SidebarProps {
   activePage: PageId
@@ -14,15 +15,22 @@ const navItems: { id: PageId; label: string; Icon: LucideIcon }[] = [
 ]
 
 export function Sidebar({ activePage, onNavigate, onLogout }: SidebarProps) {
+  const { me } = useAuth()
+
   return (
     <aside className="flex h-screen w-56 flex-col border-r border-gray-200 bg-white">
       <div className="flex items-center gap-2 px-5 py-5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-emerald-700 text-sm font-bold text-white">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-emerald-700 text-sm font-bold text-white">
           S
         </div>
-        <div>
+        <div className="min-w-0 flex-1">
           <div className="text-sm font-semibold text-gray-900">Sensagro</div>
-          <div className="text-xs text-gray-400">Admin</div>
+          <div
+            className="truncate text-xs text-gray-500"
+            title={me?.email ?? undefined}
+          >
+            {me?.email ?? '—'}
+          </div>
         </div>
       </div>
 

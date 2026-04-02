@@ -22,8 +22,8 @@ export interface Sensor {
   name: string
   type: SensorType
   status: SensorStatus
+  ownerId: string | null
   ownerEmail: string | null
-  farmName: string | null
   lastReadingAt: string | null
   lastBatteryVoltage: number | null
   createdAt: string
