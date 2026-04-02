@@ -1,0 +1,62 @@
+import { ClipboardList, LogOut, Radio, Users, type LucideIcon } from 'lucide-react'
+import type { PageId } from '@/types'
+
+interface SidebarProps {
+  activePage: PageId
+  onNavigate: (page: PageId) => void
+  onLogout: () => void
+}
+
+const navItems: { id: PageId; label: string; Icon: LucideIcon }[] = [
+  { id: 'users', label: 'Usuarios', Icon: Users },
+  { id: 'sensors', label: 'Sensores', Icon: Radio },
+  { id: 'audit', label: 'Auditoría', Icon: ClipboardList },
+]
+
+export function Sidebar({ activePage, onNavigate, onLogout }: SidebarProps) {
+  return (
+    <aside className="flex h-screen w-56 flex-col border-r border-gray-200 bg-white">
+      <div className="flex items-center gap-2 px-5 py-5">
+        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-emerald-700 text-sm font-bold text-white">
+          S
+        </div>
+        <div>
+          <div className="text-sm font-semibold text-gray-900">Sensagro</div>
+          <div className="text-xs text-gray-400">Admin</div>
+        </div>
+      </div>
+
+      <nav className="flex-1 space-y-1 px-3 pt-2">
+        {navItems.map(({ id, label, Icon }) => {
+          const isActive = activePage === id
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => onNavigate(id)}
+              className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
+                isActive
+                  ? 'bg-emerald-50 font-medium text-emerald-800'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              }`}
+            >
+              <Icon className="size-4 shrink-0 opacity-80" aria-hidden />
+              {label}
+            </button>
+          )
+        })}
+      </nav>
+
+      <div className="border-t border-gray-200 p-3">
+        <button
+          type="button"
+          onClick={onLogout}
+          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
+        >
+          <LogOut className="size-4 shrink-0 opacity-80" aria-hidden />
+          Cerrar sesión
+        </button>
+      </div>
+    </aside>
+  )
+}
