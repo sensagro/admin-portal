@@ -1,73 +1,58 @@
-# React + TypeScript + Vite
+# Sensagro — Admin portal
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Internal web app for Sensagro staff: user directory and roles, sensor lifecycle (register, assign, suspend, etc.), and audit log. UI copy is Spanish.
 
-Currently, two official plugins are available:
+**Stack:** React 19, Vite 8, Tailwind CSS 4, Firebase Authentication (email/password; admin/support roles enforced via backend).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Prerequisites
 
-## React Compiler
+- Node.js 20+
+- A running **Sensagro backend** (local or deployed)
+- A Firebase **web app** config in the same project the backend uses for Auth
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Setup
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Create `.env` in this directory (Vite only exposes variables prefixed with `VITE_`):
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `VITE_API_BASE_URL` | No | Backend origin (default `http://localhost:3000`) |
+| `VITE_FIREBASE_API_KEY` | Yes | Firebase Console → Project settings → Web app |
+| `VITE_FIREBASE_PROJECT_ID` | Yes | Same as backend `FIREBASE_PROJECT_ID` |
+| `VITE_FIREBASE_AUTH_DOMAIN` | No | Defaults to `{projectId}.firebaseapp.com` |
+| `VITE_FIREBASE_APP_ID` | No | Web app app ID |
+| `VITE_FIREBASE_STORAGE_BUCKET` | No | If your web config lists it |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | No | If your web config lists it |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Example:
+
+```env
+VITE_API_BASE_URL=http://localhost:3000
+VITE_FIREBASE_API_KEY=your-web-api-key
+VITE_FIREBASE_PROJECT_ID=your-project-id
 ```
+
+## Run locally
+
+```bash
+npm run dev
+```
+
+Sign-in only succeeds for users whose Firebase account is linked in the backend and whose role is `ADMIN` or `SUPPORT` (see backend admin module).
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Dev server with HMR |
+| `npm run build` | Typecheck + production build to `dist/` |
+| `npm run preview` | Serve `dist/` locally |
+| `npm run lint` | ESLint |
+
+## Deployment
+
+Configured for **Vercel**; `vercel.json` includes SPA routing so client-side navigation keeps working on refresh.
