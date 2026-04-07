@@ -12,7 +12,7 @@ import {
 } from '@/lib/api/sensors'
 import { fetchAdminUsers, type AdminUserRow } from '@/lib/api/users'
 import { mapSensorRow } from '@/lib/mappers/sensor'
-import { parseTerminalIds } from '@/components/sensors/RegisterSensorsModal'
+import { parseTerminalIds } from '@/utils/parseTerminalIds'
 import type { ConfirmKind } from '@/components/sensors/SensorConfirmModal'
 import { useFlash } from './useFlash'
 import type { Sensor } from '@/types'
