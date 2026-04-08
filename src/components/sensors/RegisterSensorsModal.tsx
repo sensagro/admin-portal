@@ -23,12 +23,12 @@ export function RegisterSensorsModal({
   return (
     <Modal open={open} title="Registrar sensores" onClose={onClose}>
       <p className="mb-3 text-sm text-gray-600">
-        Un ID por línea, o separados por comas. Cada uno debe ser exactamente{' '}
-        <span className="font-mono text-gray-800">10</span> caracteres hexadecimales.
+        Un ID por línea, o separados por comas. Usa el mismo identificador que Myriota (p. ej.{' '}
+        <span className="font-mono text-gray-800">901820101000096</span>), hasta 128 caracteres.
       </p>
       <textarea
         className="mb-3 min-h-32 w-full rounded-lg border border-gray-200 px-3 py-2 font-mono text-sm text-gray-900 placeholder:text-gray-400 focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
-        placeholder={'a1b2c3d4e5\nf6e7d8c9b0'}
+        placeholder={'901820101000096\na1b2c3d4e5'}
         value={text}
         onChange={(e) => onTextChange(e.target.value)}
         disabled={busy}
