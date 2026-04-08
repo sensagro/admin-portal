@@ -10,7 +10,6 @@ export interface AdminSensorApiRow {
   lastBatteryVoltage: number | null
   createdAt: string
   owner: { id: string; email: string } | null
-  farm: { id: string; name: string } | null
 }
 
 export async function fetchAdminSensors(
