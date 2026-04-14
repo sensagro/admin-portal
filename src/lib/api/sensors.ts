@@ -1,3 +1,4 @@
+import type { SensorDetail } from '@/types'
 import { apiFetch } from './client'
 
 export interface AdminSensorApiRow {
@@ -81,4 +82,11 @@ export async function decommissionSensor(
   return apiFetch(`/admin/sensors/${encodeURIComponent(sensorId)}/decommission`, getIdToken, {
     method: 'PATCH',
   })
+}
+
+export async function fetchAdminSensor(
+  sensorId: string,
+  getIdToken: () => Promise<string | null>,
+): Promise<SensorDetail> {
+  return apiFetch<SensorDetail>(`/admin/sensors/${encodeURIComponent(sensorId)}`, getIdToken)
 }

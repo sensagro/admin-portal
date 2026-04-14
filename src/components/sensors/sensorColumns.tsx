@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import type { Column } from '@/components/ui/DataTable'
 import type { Sensor, SensorStatus, SensorType } from '@/types'
 import { Badge } from '@/components/ui/Badge'
@@ -41,12 +42,20 @@ export function buildSensorColumns({ canMutate, onManage }: BuildColumnsOptions)
     {
       key: 'terminalId',
       header: 'Terminal ID',
-      render: (s) => <span className="font-mono text-xs">{s.terminalId}</span>,
+      render: (s) => (
+        <Link to={`/sensors/${s.id}`} className="font-mono text-xs text-emerald-800 hover:underline">
+          {s.terminalId}
+        </Link>
+      ),
     },
     {
       key: 'name',
       header: 'Nombre',
-      render: (s) => <span className="font-medium text-gray-900">{s.name}</span>,
+      render: (s) => (
+        <Link to={`/sensors/${s.id}`} className="font-medium text-gray-900 hover:underline">
+          {s.name}
+        </Link>
+      ),
     },
     {
       key: 'type',

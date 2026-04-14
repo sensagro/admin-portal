@@ -26,6 +26,9 @@ export interface Sensor {
   ownerEmail: string | null
   lastReadingAt: string | null
   lastBatteryVoltage: number | null
+  lastTemperature?: number | null
+  lastElevation?: number | null
+  lastAlertHasWater?: boolean | null
   createdAt: string
 }
 
@@ -39,4 +42,24 @@ export interface AuditLog {
   createdAt: string
 }
 
-export type PageId = 'users' | 'sensors' | 'audit'
+export interface UserDetail extends User {
+  ownedSensors: Pick<Sensor, 'id' | 'terminalId' | 'name' | 'status'>[]
+  pushTokens: { id: string; createdAt: string }[]
+}
+
+export type ReadingType = 'PERIODIC' | 'ALERT'
+
+export interface SensorReading {
+  id: string
+  timestamp: string
+  type: ReadingType
+  hasWater: boolean | null
+  batteryVoltage: number | null
+  temperature: number | null
+  elevation: number | null
+}
+
+export interface SensorDetail extends Sensor {
+  owner: { id: string; email: string } | null
+  readings: SensorReading[]
+}

@@ -1,21 +1,15 @@
-import { useState, type ComponentType } from 'react'
-import type { PageId } from '@/types'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { MainLayout } from '@/components/layout/MainLayout'
 import { LoginPage } from '@/pages/LoginPage'
 import { UsersPage } from '@/pages/UsersPage'
+import { UserDetailPage } from '@/pages/UserDetailPage'
 import { SensorsPage } from '@/pages/SensorsPage'
+import { SensorDetailPage } from '@/pages/SensorDetailPage'
 import { AuditLogPage } from '@/pages/AuditLogPage'
-
-const pages: Record<PageId, ComponentType> = {
-  users: UsersPage,
-  sensors: SensorsPage,
-  audit: AuditLogPage,
-}
 
 export default function App() {
   const { me, authReady, signOut } = useAuth()
-  const [activePage, setActivePage] = useState<PageId>('users')
 
   if (!authReady) {
     return (
@@ -29,15 +23,17 @@ export default function App() {
     return <LoginPage />
   }
 
-  const ActivePage = pages[activePage]
-
   return (
-    <MainLayout
-      activePage={activePage}
-      onNavigate={setActivePage}
-      onLogout={() => void signOut()}
-    >
-      <ActivePage />
+    <MainLayout onLogout={() => void signOut()}>
+      <Routes>
+        <Route path="/" element={<Navigate to="/users" replace />} />
+        <Route path="/users" element={<UsersPage />} />
+        <Route path="/users/:id" element={<UserDetailPage />} />
+        <Route path="/sensors" element={<SensorsPage />} />
+        <Route path="/sensors/:id" element={<SensorDetailPage />} />
+        <Route path="/audit" element={<AuditLogPage />} />
+        <Route path="*" element={<Navigate to="/users" replace />} />
+      </Routes>
     </MainLayout>
   )
 }

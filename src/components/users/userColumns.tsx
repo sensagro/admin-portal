@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import type { Column } from '@/components/ui/DataTable'
 import type { User, UserRole } from '@/types'
 import { Badge } from '@/components/ui/Badge'
@@ -24,7 +25,11 @@ export function buildUserColumns({
     {
       key: 'email',
       header: 'Email',
-      render: (user) => <span className="font-medium text-gray-900">{user.email}</span>,
+      render: (user) => (
+        <Link to={`/users/${user.id}`} className="font-medium text-emerald-800 hover:underline">
+          {user.email}
+        </Link>
+      ),
     },
     {
       key: 'role',

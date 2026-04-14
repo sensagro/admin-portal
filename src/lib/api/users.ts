@@ -1,4 +1,4 @@
-import type { UserRole } from '@/types'
+import type { UserDetail, UserRole } from '@/types'
 import { apiFetch, apiFetchWithToken } from './client'
 
 export interface MeUser {
@@ -42,4 +42,11 @@ export async function patchUserRole(
       body: JSON.stringify({ role }),
     },
   )
+}
+
+export async function fetchAdminUser(
+  userId: string,
+  getIdToken: () => Promise<string | null>,
+): Promise<UserDetail> {
+  return apiFetch<UserDetail>(`/admin/users/${encodeURIComponent(userId)}`, getIdToken)
 }

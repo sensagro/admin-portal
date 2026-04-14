@@ -1,4 +1,4 @@
-import type { Sensor, SensorStatus, SensorType } from '@/types'
+import type { Sensor, SensorDetail, SensorStatus, SensorType } from '@/types'
 import type { AdminSensorApiRow } from '@/lib/api/sensors'
 
 export function mapSensorRow(row: AdminSensorApiRow): Sensor {
@@ -13,5 +13,23 @@ export function mapSensorRow(row: AdminSensorApiRow): Sensor {
     lastReadingAt: row.lastReadingAt,
     lastBatteryVoltage: row.lastBatteryVoltage,
     createdAt: row.createdAt,
+  }
+}
+
+export function mapSensorDetailToSensor(d: SensorDetail): Sensor {
+  return {
+    id: d.id,
+    terminalId: d.terminalId,
+    name: d.name,
+    type: d.type,
+    status: d.status,
+    ownerId: d.ownerId ?? d.owner?.id ?? null,
+    ownerEmail: d.owner?.email ?? null,
+    lastReadingAt: d.lastReadingAt,
+    lastBatteryVoltage: d.lastBatteryVoltage,
+    lastTemperature: d.lastTemperature,
+    lastElevation: d.lastElevation,
+    lastAlertHasWater: d.lastAlertHasWater,
+    createdAt: d.createdAt,
   }
 }
