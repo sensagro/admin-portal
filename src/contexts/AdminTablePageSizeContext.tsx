@@ -39,6 +39,7 @@ function saveToStorage(store: Store) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store))
   } catch {
+    /* ignore localStorage write failures (quota, private mode, etc.) */
   }
 }
 
@@ -76,6 +77,8 @@ export function AdminTablePageSizeProvider({ children }: { children: ReactNode }
   )
 }
 
+/** Context module: provider + hook. */
+// eslint-disable-next-line react-refresh/only-export-components -- hook paired with provider above
 export function useAdminTablePageSize(id: AdminTableId): {
   pageSize: PageSize
   setPageSize: (size: PageSize) => void
