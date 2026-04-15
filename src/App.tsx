@@ -7,6 +7,7 @@ import { UserDetailPage } from '@/pages/UserDetailPage'
 import { SensorsPage } from '@/pages/SensorsPage'
 import { SensorDetailPage } from '@/pages/SensorDetailPage'
 import { AuditLogPage } from '@/pages/AuditLogPage'
+import { AdminTablePageSizeProvider } from '@/contexts/AdminTablePageSizeContext'
 
 export default function App() {
   const { me, authReady, signOut } = useAuth()
@@ -25,15 +26,17 @@ export default function App() {
 
   return (
     <MainLayout onLogout={() => void signOut()}>
-      <Routes>
-        <Route path="/" element={<Navigate to="/users" replace />} />
-        <Route path="/users" element={<UsersPage />} />
-        <Route path="/users/:id" element={<UserDetailPage />} />
-        <Route path="/sensors" element={<SensorsPage />} />
-        <Route path="/sensors/:id" element={<SensorDetailPage />} />
-        <Route path="/audit" element={<AuditLogPage />} />
-        <Route path="*" element={<Navigate to="/users" replace />} />
-      </Routes>
+      <AdminTablePageSizeProvider>
+        <Routes>
+          <Route path="/" element={<Navigate to="/users" replace />} />
+          <Route path="/users" element={<UsersPage />} />
+          <Route path="/users/:id" element={<UserDetailPage />} />
+          <Route path="/sensors" element={<SensorsPage />} />
+          <Route path="/sensors/:id" element={<SensorDetailPage />} />
+          <Route path="/audit" element={<AuditLogPage />} />
+          <Route path="*" element={<Navigate to="/users" replace />} />
+        </Routes>
+      </AdminTablePageSizeProvider>
     </MainLayout>
   )
 }

@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { PageSizeSelect } from '@/components/ui/PageSizeSelect'
 import { Button } from '@/components/ui/Button'
 import { DataTable } from '@/components/ui/DataTable'
 import { RegisterSensorsModal } from '@/components/sensors/RegisterSensorsModal'
@@ -14,6 +15,11 @@ export function SensorsPage() {
     rows,
     loading,
     error,
+    hasMore,
+    loadingMore,
+    loadMore,
+    pageSize,
+    setPageSize,
     banner,
     users,
     userFilter,
@@ -53,12 +59,20 @@ export function SensorsPage() {
   return (
     <>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <PageHeader title="Sensores" count={loading ? undefined : rows.length} />
-        {canMutate && (
-          <Button variant="primary" onClick={openRegister}>
-            Registrar sensores
-          </Button>
-        )}
+        <PageHeader title="Sensores" count={loading ? undefined : rows.length} className="min-w-0" />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4">
+          <PageSizeSelect
+            id="sensors-page-size"
+            value={pageSize}
+            onChange={setPageSize}
+            disabled={loading || loadingMore}
+          />
+          {canMutate && (
+            <Button variant="primary" onClick={openRegister}>
+              Registrar sensores
+            </Button>
+          )}
+        </div>
       </div>
 
       {banner && (
@@ -78,9 +92,23 @@ export function SensorsPage() {
       {loading ? (
         <p className="text-sm text-gray-500">Cargando sensores…</p>
       ) : (
-        <div className="rounded-xl border border-gray-200 bg-white">
-          <DataTable columns={columns} rows={rows} keyExtractor={(r) => r.id} />
-        </div>
+        <>
+          <div className="rounded-xl border border-gray-200 bg-white">
+            <DataTable columns={columns} rows={rows} keyExtractor={(r) => r.id} />
+          </div>
+          {hasMore && (
+            <div className="mt-4 flex justify-center">
+              <button
+                type="button"
+                onClick={() => void loadMore()}
+                disabled={loadingMore}
+                className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              >
+                {loadingMore ? 'Cargando…' : 'Cargar más'}
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       <RegisterSensorsModal

@@ -1,11 +1,12 @@
 interface PageHeaderProps {
   title: string
   count?: number
+  className?: string
 }
 
-export function PageHeader({ title, count }: PageHeaderProps) {
+export function PageHeader({ title, count, className = 'mb-6' }: PageHeaderProps) {
   return (
-    <div className="mb-6">
+    <div className={className}>
       <h1 className="text-xl font-semibold text-gray-900">
         {title}
         {count !== undefined && (

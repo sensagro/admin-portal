@@ -25,8 +25,10 @@ export interface AdminUserRow {
 export async function fetchAdminUsers(
   getIdToken: () => Promise<string | null>,
   limit = 200,
+  cursor?: string,
 ): Promise<AdminUserRow[]> {
-  return apiFetch<AdminUserRow[]>(`/admin/users?limit=${limit}`, getIdToken)
+  const q = `/admin/users?limit=${limit}${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`
+  return apiFetch<AdminUserRow[]>(q, getIdToken)
 }
 
 export async function patchUserRole(

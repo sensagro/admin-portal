@@ -16,15 +16,20 @@ import { parseTerminalIds } from '@/utils/parseTerminalIds'
 import type { ConfirmKind } from '@/components/sensors/SensorConfirmModal'
 import { useFlash } from './useFlash'
 import type { Sensor } from '@/types'
+import { useAdminTablePageSize } from '@/contexts/AdminTablePageSizeContext'
 
 export function useSensors() {
   const { me, getIdToken, signOut } = useAuth()
   const canMutate = me?.role === 'ADMIN'
   const { banner, showFlash } = useFlash()
+  const { pageSize, setPageSize } = useAdminTablePageSize('sensors')
 
   const [rows, setRows] = useState<Sensor[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [cursor, setCursor] = useState<string | null>(null)
+  const [hasMore, setHasMore] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
 
   const [users, setUsers] = useState<AdminUserRow[]>([])
   const [userFilter, setUserFilter] = useState('')
@@ -57,17 +62,50 @@ export function useSensors() {
 
   const reload = useCallback(async () => {
     setLoading(true)
+    setLoadingMore(false)
     setError(null)
     try {
-      const data = await fetchAdminSensors(getIdToken)
+      const data = await fetchAdminSensors(getIdToken, pageSize)
       setRows(data.map(mapSensorRow))
+      if (data.length === pageSize) {
+        setHasMore(true)
+        setCursor(data[data.length - 1].id)
+      } else {
+        setHasMore(false)
+        setCursor(null)
+      }
     } catch (e) {
       if (await handleAuthError(e)) return
+      setHasMore(false)
+      setCursor(null)
       setError(e instanceof Error ? e.message : 'Error al cargar sensores')
     } finally {
       setLoading(false)
     }
-  }, [getIdToken, handleAuthError])
+  }, [getIdToken, handleAuthError, pageSize])
+
+  const loadMore = useCallback(async () => {
+    if (!hasMore || loadingMore || loading) return
+    if (cursor == null) return
+    setLoadingMore(true)
+    setError(null)
+    try {
+      const data = await fetchAdminSensors(getIdToken, pageSize, cursor)
+      setRows((prev) => [...prev, ...data.map(mapSensorRow)])
+      if (data.length === pageSize) {
+        setHasMore(true)
+        setCursor(data[data.length - 1].id)
+      } else {
+        setHasMore(false)
+        setCursor(null)
+      }
+    } catch (e) {
+      if (await handleAuthError(e)) return
+      setError(e instanceof Error ? e.message : 'Error al cargar sensores')
+    } finally {
+      setLoadingMore(false)
+    }
+  }, [getIdToken, handleAuthError, hasMore, loadingMore, loading, cursor, pageSize])
 
   const loadUsers = useCallback(async () => {
     if (!canMutate) return
@@ -202,6 +240,11 @@ export function useSensors() {
     rows,
     loading,
     error,
+    hasMore,
+    loadingMore,
+    loadMore,
+    pageSize,
+    setPageSize,
     banner,
     users: filteredUsers,
     userFilter,

@@ -16,8 +16,10 @@ export interface AdminSensorApiRow {
 export async function fetchAdminSensors(
   getIdToken: () => Promise<string | null>,
   limit = 200,
+  cursor?: string,
 ): Promise<AdminSensorApiRow[]> {
-  return apiFetch<AdminSensorApiRow[]>(`/admin/sensors?limit=${limit}`, getIdToken)
+  const q = `/admin/sensors?limit=${limit}${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`
+  return apiFetch<AdminSensorApiRow[]>(q, getIdToken)
 }
 
 export interface BulkRegisterSensorsResult {

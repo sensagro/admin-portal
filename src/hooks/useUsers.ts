@@ -19,10 +19,21 @@ export function useUsers() {
   const canChangeRole = me?.role === 'ADMIN'
   const { banner, showFlash } = useFlash()
 
-  const { data: rows, loading, error, reload } = useAdminData(
+  const {
+    data: rows,
+    loading,
+    error,
+    reload,
+    hasMore,
+    loadingMore,
+    loadMore,
+    pageSize,
+    setPageSize,
+  } = useAdminData(
     fetchAdminUsers,
     mapUserRow,
     'Error al cargar usuarios',
+    'users',
   )
 
   const [roleTarget, setRoleTarget] = useState<User | null>(null)
@@ -84,6 +95,11 @@ export function useUsers() {
     rows,
     loading,
     error,
+    hasMore,
+    loadingMore,
+    loadMore,
+    pageSize,
+    setPageSize,
     banner,
     columns,
     roleTarget,

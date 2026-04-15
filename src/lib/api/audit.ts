@@ -14,6 +14,8 @@ export interface AuditLogApiRow {
 export async function fetchAuditLogs(
   getIdToken: () => Promise<string | null>,
   limit = 200,
+  cursor?: string,
 ): Promise<AuditLogApiRow[]> {
-  return apiFetch<AuditLogApiRow[]>(`/admin/audit-log?limit=${limit}`, getIdToken)
+  const q = `/admin/audit-log?limit=${limit}${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`
+  return apiFetch<AuditLogApiRow[]>(q, getIdToken)
 }

@@ -4,6 +4,7 @@ import type { AuditLog } from '@/types'
 import type { Column } from '@/components/ui/DataTable'
 import { DataTable } from '@/components/ui/DataTable'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { PageSizeSelect } from '@/components/ui/PageSizeSelect'
 import { useAdminData } from '@/hooks/useAdminData'
 
 function AuditPayloadCell({ payload }: { payload: Record<string, unknown> | null }) {
@@ -61,20 +62,60 @@ const columns: Column<AuditLog>[] = [
 ]
 
 export function AuditLogPage() {
-  const { data: rows, loading, error } = useAdminData(fetchAuditLogs, mapAuditRow, 'Error al cargar auditoría')
+  const {
+    data: rows,
+    loading,
+    error,
+    hasMore,
+    loadingMore,
+    loadMore,
+    pageSize,
+    setPageSize,
+  } = useAdminData(
+    fetchAuditLogs,
+    mapAuditRow,
+    'Error al cargar auditoría',
+    'audit',
+  )
 
   return (
     <>
-      <PageHeader title="Registro de auditoría" count={loading ? undefined : rows.length} />
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <PageHeader
+          title="Registro de auditoría"
+          count={loading ? undefined : rows.length}
+          className="min-w-0"
+        />
+        <PageSizeSelect
+          id="audit-page-size"
+          value={pageSize}
+          onChange={setPageSize}
+          disabled={loading || loadingMore}
+        />
+      </div>
       {error && (
         <div className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">{error}</div>
       )}
       {loading ? (
         <p className="text-sm text-gray-500">Cargando auditoría…</p>
       ) : (
-        <div className="rounded-xl border border-gray-200 bg-white">
-          <DataTable columns={columns} rows={rows} keyExtractor={(l) => l.id} />
-        </div>
+        <>
+          <div className="rounded-xl border border-gray-200 bg-white">
+            <DataTable columns={columns} rows={rows} keyExtractor={(l) => l.id} />
+          </div>
+          {hasMore && (
+            <div className="mt-4 flex justify-center">
+              <button
+                type="button"
+                onClick={() => void loadMore()}
+                disabled={loadingMore}
+                className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              >
+                {loadingMore ? 'Cargando…' : 'Cargar más'}
+              </button>
+            </div>
+          )}
+        </>
       )}
     </>
   )
