@@ -29,6 +29,7 @@ export function useUsers() {
     loadMore,
     pageSize,
     setPageSize,
+    total,
   } = useAdminData(
     fetchAdminUsers,
     mapUserRow,
@@ -100,6 +101,7 @@ export function useUsers() {
     loadMore,
     pageSize,
     setPageSize,
+    total,
     banner,
     columns,
     roleTarget,

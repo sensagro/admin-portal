@@ -71,6 +71,7 @@ export function AuditLogPage() {
     loadMore,
     pageSize,
     setPageSize,
+    total,
   } = useAdminData(
     fetchAuditLogs,
     mapAuditRow,
@@ -84,6 +85,7 @@ export function AuditLogPage() {
         <PageHeader
           title="Registro de auditoría"
           count={loading ? undefined : rows.length}
+          total={loading ? undefined : total ?? undefined}
           className="min-w-0"
         />
         <PageSizeSelect

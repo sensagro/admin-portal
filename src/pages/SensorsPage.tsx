@@ -20,6 +20,7 @@ export function SensorsPage() {
     loadMore,
     pageSize,
     setPageSize,
+    total,
     banner,
     users,
     userFilter,
@@ -59,7 +60,12 @@ export function SensorsPage() {
   return (
     <>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <PageHeader title="Sensores" count={loading ? undefined : rows.length} className="min-w-0" />
+        <PageHeader
+          title="Sensores"
+          count={loading ? undefined : rows.length}
+          total={loading ? undefined : total ?? undefined}
+          className="min-w-0"
+        />
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4">
           <PageSizeSelect
             id="sensors-page-size"

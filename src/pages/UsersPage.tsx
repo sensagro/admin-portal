@@ -14,6 +14,7 @@ export function UsersPage() {
     loadMore,
     pageSize,
     setPageSize,
+    total,
     banner,
     columns,
     roleTarget,
@@ -31,6 +32,7 @@ export function UsersPage() {
         <PageHeader
           title="Usuarios registrados"
           count={loading ? undefined : rows.length}
+          total={loading ? undefined : total ?? undefined}
           className="min-w-0"
         />
         <PageSizeSelect

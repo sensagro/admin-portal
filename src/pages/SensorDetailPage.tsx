@@ -81,8 +81,8 @@ export function SensorDetailPage() {
   const loadUsers = useCallback(async () => {
     if (!canMutate) return
     try {
-      const data = await fetchAdminUsers(getIdToken, 500)
-      setUsers(data.sort((a, b) => a.email.localeCompare(b.email)))
+      const { items } = await fetchAdminUsers(getIdToken, 500)
+      setUsers(items.sort((a, b) => a.email.localeCompare(b.email)))
     } catch (e) {
       if (await handleAuthError(e)) return
       console.error(e)

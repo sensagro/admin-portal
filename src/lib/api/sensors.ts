@@ -1,4 +1,5 @@
 import type { SensorDetail } from '@/types'
+import type { AdminListResponse } from './admin-list'
 import { apiFetch } from './client'
 
 export interface AdminSensorApiRow {
@@ -17,9 +18,9 @@ export async function fetchAdminSensors(
   getIdToken: () => Promise<string | null>,
   limit = 200,
   cursor?: string,
-): Promise<AdminSensorApiRow[]> {
+): Promise<AdminListResponse<AdminSensorApiRow>> {
   const q = `/admin/sensors?limit=${limit}${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`
-  return apiFetch<AdminSensorApiRow[]>(q, getIdToken)
+  return apiFetch<AdminListResponse<AdminSensorApiRow>>(q, getIdToken)
 }
 
 export interface BulkRegisterSensorsResult {

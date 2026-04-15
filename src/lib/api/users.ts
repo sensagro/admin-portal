@@ -1,4 +1,5 @@
 import type { UserDetail, UserRole } from '@/types'
+import type { AdminListResponse } from './admin-list'
 import { apiFetch, apiFetchWithToken } from './client'
 
 export interface MeUser {
@@ -26,9 +27,9 @@ export async function fetchAdminUsers(
   getIdToken: () => Promise<string | null>,
   limit = 200,
   cursor?: string,
-): Promise<AdminUserRow[]> {
+): Promise<AdminListResponse<AdminUserRow>> {
   const q = `/admin/users?limit=${limit}${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`
-  return apiFetch<AdminUserRow[]>(q, getIdToken)
+  return apiFetch<AdminListResponse<AdminUserRow>>(q, getIdToken)
 }
 
 export async function patchUserRole(

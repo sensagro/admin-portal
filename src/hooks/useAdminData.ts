@@ -8,7 +8,7 @@ type ApiFn<TRaw extends { id: string }> = (
   getIdToken: () => Promise<string | null>,
   limit: number,
   cursor?: string,
-) => Promise<TRaw[]>
+) => Promise<{ items: TRaw[]; total: number }>
 
 interface UseAdminDataResult<T> {
   data: T[]
@@ -20,6 +20,8 @@ interface UseAdminDataResult<T> {
   loadMore: () => Promise<void>
   pageSize: PageSize
   setPageSize: (size: PageSize) => void
+  /** Total rows matching the current filters (from the server), not only loaded rows. */
+  total: number | null
 }
 
 export function useAdminData<TRaw extends { id: string }, T = TRaw>(
@@ -36,21 +38,21 @@ export function useAdminData<TRaw extends { id: string }, T = TRaw>(
   const [cursor, setCursor] = useState<string | null>(null)
   const [hasMore, setHasMore] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
+  const [total, setTotal] = useState<number | null>(null)
 
   const reload = useCallback(async () => {
     setLoading(true)
     setLoadingMore(false)
     setError(null)
     try {
-      const raw = await apiFn(getIdToken, pageSize, undefined)
-      setData(raw.map(mapper))
-      if (raw.length === pageSize) {
-        setHasMore(true)
-        setCursor(raw[raw.length - 1].id)
-      } else {
-        setHasMore(false)
-        setCursor(null)
-      }
+      const { items: raw, total: t } = await apiFn(getIdToken, pageSize, undefined)
+      const mapped = raw.map(mapper)
+      setData(mapped)
+      setTotal(t)
+      const loaded = mapped.length
+      const more = loaded < t
+      setHasMore(more)
+      setCursor(more && raw.length > 0 ? raw[raw.length - 1].id : null)
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) {
         await signOut()
@@ -58,6 +60,7 @@ export function useAdminData<TRaw extends { id: string }, T = TRaw>(
       }
       setHasMore(false)
       setCursor(null)
+      setTotal(null)
       setError(e instanceof Error ? e.message : errorMessage)
     } finally {
       setLoading(false)
@@ -70,15 +73,14 @@ export function useAdminData<TRaw extends { id: string }, T = TRaw>(
     setLoadingMore(true)
     setError(null)
     try {
-      const raw = await apiFn(getIdToken, pageSize, cursor)
-      setData((prev) => [...prev, ...raw.map(mapper)])
-      if (raw.length === pageSize) {
-        setHasMore(true)
-        setCursor(raw[raw.length - 1].id)
-      } else {
-        setHasMore(false)
-        setCursor(null)
-      }
+      const { items: raw, total: t } = await apiFn(getIdToken, pageSize, cursor)
+      const chunk = raw.map(mapper)
+      const nextLen = data.length + chunk.length
+      setData((prev) => [...prev, ...chunk])
+      setTotal(t)
+      const more = nextLen < t
+      setHasMore(more)
+      setCursor(more && raw.length > 0 ? raw[raw.length - 1].id : null)
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) {
         await signOut()
@@ -88,11 +90,34 @@ export function useAdminData<TRaw extends { id: string }, T = TRaw>(
     } finally {
       setLoadingMore(false)
     }
-  }, [apiFn, mapper, getIdToken, signOut, errorMessage, hasMore, loadingMore, loading, cursor, pageSize])
+  }, [
+    apiFn,
+    mapper,
+    getIdToken,
+    signOut,
+    errorMessage,
+    hasMore,
+    loadingMore,
+    loading,
+    cursor,
+    pageSize,
+    data.length,
+  ])
 
   useEffect(() => {
     void reload()
   }, [reload])
 
-  return { data, loading, error, reload, hasMore, loadingMore, loadMore, pageSize, setPageSize }
+  return {
+    data,
+    loading,
+    error,
+    reload,
+    hasMore,
+    loadingMore,
+    loadMore,
+    pageSize,
+    setPageSize,
+    total,
+  }
 }

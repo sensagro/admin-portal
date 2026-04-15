@@ -1,4 +1,5 @@
 import type { UserRole } from '@/types'
+import type { AdminListResponse } from './admin-list'
 import { apiFetch } from './client'
 
 export interface AuditLogApiRow {
@@ -15,7 +16,7 @@ export async function fetchAuditLogs(
   getIdToken: () => Promise<string | null>,
   limit = 200,
   cursor?: string,
-): Promise<AuditLogApiRow[]> {
+): Promise<AdminListResponse<AuditLogApiRow>> {
   const q = `/admin/audit-log?limit=${limit}${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`
-  return apiFetch<AuditLogApiRow[]>(q, getIdToken)
+  return apiFetch<AdminListResponse<AuditLogApiRow>>(q, getIdToken)
 }

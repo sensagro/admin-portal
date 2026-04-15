@@ -30,6 +30,7 @@ export function useSensors() {
   const [cursor, setCursor] = useState<string | null>(null)
   const [hasMore, setHasMore] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
+  const [total, setTotal] = useState<number | null>(null)
 
   const [users, setUsers] = useState<AdminUserRow[]>([])
   const [userFilter, setUserFilter] = useState('')
@@ -65,19 +66,18 @@ export function useSensors() {
     setLoadingMore(false)
     setError(null)
     try {
-      const data = await fetchAdminSensors(getIdToken, pageSize)
-      setRows(data.map(mapSensorRow))
-      if (data.length === pageSize) {
-        setHasMore(true)
-        setCursor(data[data.length - 1].id)
-      } else {
-        setHasMore(false)
-        setCursor(null)
-      }
+      const { items, total: t } = await fetchAdminSensors(getIdToken, pageSize)
+      setRows(items.map(mapSensorRow))
+      setTotal(t)
+      const loaded = items.length
+      const more = loaded < t
+      setHasMore(more)
+      setCursor(more && loaded > 0 ? items[loaded - 1].id : null)
     } catch (e) {
       if (await handleAuthError(e)) return
       setHasMore(false)
       setCursor(null)
+      setTotal(null)
       setError(e instanceof Error ? e.message : 'Error al cargar sensores')
     } finally {
       setLoading(false)
@@ -90,28 +90,27 @@ export function useSensors() {
     setLoadingMore(true)
     setError(null)
     try {
-      const data = await fetchAdminSensors(getIdToken, pageSize, cursor)
-      setRows((prev) => [...prev, ...data.map(mapSensorRow)])
-      if (data.length === pageSize) {
-        setHasMore(true)
-        setCursor(data[data.length - 1].id)
-      } else {
-        setHasMore(false)
-        setCursor(null)
-      }
+      const { items, total: t } = await fetchAdminSensors(getIdToken, pageSize, cursor)
+      const chunk = items.map(mapSensorRow)
+      const nextLen = rows.length + chunk.length
+      setRows((prev) => [...prev, ...chunk])
+      setTotal(t)
+      const more = nextLen < t
+      setHasMore(more)
+      setCursor(more && items.length > 0 ? items[items.length - 1].id : null)
     } catch (e) {
       if (await handleAuthError(e)) return
       setError(e instanceof Error ? e.message : 'Error al cargar sensores')
     } finally {
       setLoadingMore(false)
     }
-  }, [getIdToken, handleAuthError, hasMore, loadingMore, loading, cursor, pageSize])
+  }, [getIdToken, handleAuthError, hasMore, loadingMore, loading, cursor, pageSize, rows.length])
 
   const loadUsers = useCallback(async () => {
     if (!canMutate) return
     try {
-      const data = await fetchAdminUsers(getIdToken, 500)
-      setUsers(data.sort((a, b) => a.email.localeCompare(b.email)))
+      const { items } = await fetchAdminUsers(getIdToken, 500)
+      setUsers(items.sort((a, b) => a.email.localeCompare(b.email)))
     } catch (e) {
       if (await handleAuthError(e)) return
       console.error(e)
@@ -245,6 +244,7 @@ export function useSensors() {
     loadMore,
     pageSize,
     setPageSize,
+    total,
     banner,
     users: filteredUsers,
     userFilter,
