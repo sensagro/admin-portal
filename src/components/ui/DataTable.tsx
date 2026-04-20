@@ -10,9 +10,17 @@ interface DataTableProps<T> {
   columns: Column<T>[]
   rows: T[]
   keyExtractor: (row: T) => string
+  isLoading?: boolean
+  skeletonRows?: number
 }
 
-export function DataTable<T>({ columns, rows, keyExtractor }: DataTableProps<T>) {
+export function DataTable<T>({
+  columns,
+  rows,
+  keyExtractor,
+  isLoading = false,
+  skeletonRows = 8,
+}: DataTableProps<T>) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
@@ -29,18 +37,28 @@ export function DataTable<T>({ columns, rows, keyExtractor }: DataTableProps<T>)
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => (
-            <tr
-              key={keyExtractor(row)}
-              className="border-b border-gray-100 transition-colors hover:bg-gray-50"
-            >
-              {columns.map((col) => (
-                <td key={col.key} className="px-4 py-3 text-gray-700">
-                  {col.render(row)}
-                </td>
+          {isLoading
+            ? Array.from({ length: skeletonRows }, (_, i) => (
+                <tr key={`skeleton-${i}`} className="border-b border-gray-100">
+                  {columns.map((col) => (
+                    <td key={col.key} className="px-4 py-3">
+                      <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200" />
+                    </td>
+                  ))}
+                </tr>
+              ))
+            : rows.map((row) => (
+                <tr
+                  key={keyExtractor(row)}
+                  className="border-b border-gray-100 transition-colors hover:bg-gray-50"
+                >
+                  {columns.map((col) => (
+                    <td key={col.key} className="px-4 py-3 text-gray-700">
+                      {col.render(row)}
+                    </td>
+                  ))}
+                </tr>
               ))}
-            </tr>
-          ))}
         </tbody>
       </table>
     </div>

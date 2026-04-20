@@ -98,27 +98,28 @@ export function AuditLogPage() {
       {error && (
         <div className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">{error}</div>
       )}
-      {loading ? (
-        <p className="text-sm text-gray-500">Cargando auditoría…</p>
-      ) : (
-        <>
-          <div className="rounded-xl border border-gray-200 bg-white">
-            <DataTable columns={columns} rows={rows} keyExtractor={(l) => l.id} />
+      <>
+        <div className="rounded-xl border border-gray-200 bg-white">
+          <DataTable
+            isLoading={loading}
+            columns={columns}
+            rows={rows}
+            keyExtractor={(l) => l.id}
+          />
+        </div>
+        {hasMore && !loading && (
+          <div className="mt-4 flex justify-center">
+            <button
+              type="button"
+              onClick={() => void loadMore()}
+              disabled={loadingMore}
+              className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            >
+              {loadingMore ? 'Cargando…' : 'Cargar más'}
+            </button>
           </div>
-          {hasMore && (
-            <div className="mt-4 flex justify-center">
-              <button
-                type="button"
-                onClick={() => void loadMore()}
-                disabled={loadingMore}
-                className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-              >
-                {loadingMore ? 'Cargando…' : 'Cargar más'}
-              </button>
-            </div>
-          )}
-        </>
-      )}
+        )}
+      </>
     </>
   )
 }
