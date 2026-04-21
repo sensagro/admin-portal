@@ -1,3 +1,6 @@
+import { firebaseAuth } from '@/lib/firebase'
+import { notifySessionExpired } from '@/lib/session-expired-bridge'
+
 export class ApiError extends Error {
   readonly status: number
   readonly body: unknown | undefined
@@ -50,6 +53,16 @@ function buildHeaders(token: string, init?: RequestInit): Headers {
   return headers
 }
 
+async function tryRefreshIdToken(): Promise<string | null> {
+  const u = firebaseAuth.currentUser
+  if (!u) return null
+  try {
+    return await u.getIdToken(true)
+  } catch {
+    return null
+  }
+}
+
 export async function apiFetch<T>(
   path: string,
   getIdToken: () => Promise<string | null>,
@@ -57,13 +70,30 @@ export async function apiFetch<T>(
 ): Promise<T> {
   const token = await getIdToken()
   if (!token) {
+    notifySessionExpired()
     throw new ApiError('Sesión expirada', 401)
   }
 
-  const res = await fetch(buildUrl(path), { ...init, headers: buildHeaders(token, init) })
-  const body = await parseJsonSafe(res)
+  const doFetch = (idTok: string) =>
+    fetch(buildUrl(path), { ...init, headers: buildHeaders(idTok, init) })
+
+  let res = await doFetch(token)
+  let body = await parseJsonSafe(res)
+
+  if (res.status === 401) {
+    const refreshed = await tryRefreshIdToken()
+    if (!refreshed) {
+      notifySessionExpired()
+      throw new ApiError(extractApiErrorMessage(body, 'Sesión expirada'), 401, body)
+    }
+    res = await doFetch(refreshed)
+    body = await parseJsonSafe(res)
+  }
 
   if (!res.ok) {
+    if (res.status === 401) {
+      notifySessionExpired()
+    }
     const msg = extractApiErrorMessage(body, res.statusText || 'Error de red')
     throw new ApiError(msg, res.status, body)
   }
