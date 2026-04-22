@@ -46,7 +46,9 @@ export function UsersPage() {
       {banner && (
         <div
           className={`mb-4 rounded-lg px-4 py-2 text-sm ${
-            banner.type === 'success' ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-600'
+            banner.type === 'success'
+              ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200'
+              : 'bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-300'
           }`}
         >
           {banner.text}
@@ -54,11 +56,13 @@ export function UsersPage() {
       )}
 
       {error && (
-        <div className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">{error}</div>
+        <div className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600 dark:bg-red-950/50 dark:text-red-300">
+          {error}
+        </div>
       )}
 
       <>
-        <div className="rounded-xl border border-gray-200 bg-white">
+        <div className="rounded-xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-900">
           <DataTable
             isLoading={loading}
             columns={columns}
@@ -72,7 +76,7 @@ export function UsersPage() {
               type="button"
               onClick={() => void loadMore()}
               disabled={loadingMore}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-800"
             >
               {loadingMore ? 'Cargando…' : 'Cargar más'}
             </button>

@@ -43,7 +43,10 @@ export function buildSensorColumns({ canMutate, onManage }: BuildColumnsOptions)
       key: 'terminalId',
       header: 'Terminal ID',
       render: (s) => (
-        <Link to={`/sensors/${s.id}`} className="font-mono text-xs text-emerald-800 hover:underline">
+        <Link
+          to={`/sensors/${s.id}`}
+          className="font-mono text-xs text-emerald-800 hover:underline dark:text-emerald-400"
+        >
           {s.terminalId}
         </Link>
       ),
@@ -52,7 +55,7 @@ export function buildSensorColumns({ canMutate, onManage }: BuildColumnsOptions)
       key: 'name',
       header: 'Nombre',
       render: (s) => (
-        <Link to={`/sensors/${s.id}`} className="font-medium text-gray-900 hover:underline">
+        <Link to={`/sensors/${s.id}`} className="font-medium text-gray-900 hover:underline dark:text-gray-100">
           {s.name}
         </Link>
       ),
@@ -73,7 +76,7 @@ export function buildSensorColumns({ canMutate, onManage }: BuildColumnsOptions)
     {
       key: 'ownerEmail',
       header: 'Propietario',
-      render: (s) => s.ownerEmail ?? <span className="text-gray-400">—</span>,
+      render: (s) => s.ownerEmail ?? <span className="text-gray-400 dark:text-gray-500">—</span>,
     },
     {
       key: 'createdAt',

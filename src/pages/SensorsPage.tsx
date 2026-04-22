@@ -16,6 +16,8 @@ export function SensorsPage() {
     rows,
     signalTableFilter,
     setSignalTableFilter,
+    statusTableFilter,
+    setStatusTableFilter,
     fleetRefreshKey,
     loading,
     error,
@@ -30,6 +32,7 @@ export function SensorsPage() {
     userFilter,
     setUserFilter,
     registerOpen,
+    registerModalKey,
     openRegister,
     closeRegister,
     registerText,
@@ -37,6 +40,7 @@ export function SensorsPage() {
     registerBusy,
     registerErr,
     handleBulkRegister,
+    existingTerminalIds,
     manageSensor,
     openManage,
     closeManage,
@@ -88,7 +92,9 @@ export function SensorsPage() {
       {banner && (
         <div
           className={`mb-4 rounded-lg px-4 py-2 text-sm ${
-            banner.type === 'success' ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-600'
+            banner.type === 'success'
+              ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200'
+              : 'bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-300'
           }`}
         >
           {banner.text}
@@ -96,31 +102,39 @@ export function SensorsPage() {
       )}
 
       {error && (
-        <div className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">{error}</div>
+        <div className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600 dark:bg-red-950/50 dark:text-red-300">
+          {error}
+        </div>
       )}
 
       <FleetSignalCard
         refreshKey={fleetRefreshKey}
-        onApplyTableFilter={(status) => setSignalTableFilter(status)}
+        onApplySignalTableFilter={setSignalTableFilter}
+        onApplyStatusTableFilter={setStatusTableFilter}
         onOpenSensor={openManage}
       />
 
-      {signalTableFilter && (
+      {(signalTableFilter || statusTableFilter) && (
         <div className="mb-4 flex flex-wrap items-center gap-2">
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-gray-600 dark:text-gray-300">
             Filtro:{' '}
             <strong>
-              {signalTableFilter === 'SILENT'
-                ? 'Sin señal'
-                : signalTableFilter === 'NEVER_REPORTED'
-                  ? 'Esperando primera lectura'
-                  : 'Señal reciente'}
+              {statusTableFilter === 'UNASSIGNED'
+                ? 'Sin asignar'
+                : signalTableFilter === 'SILENT'
+                  ? 'Sin señal'
+                  : signalTableFilter === 'NEVER_REPORTED'
+                    ? 'Esperando primera lectura'
+                    : 'Señal reciente'}
             </strong>
           </span>
           <button
             type="button"
-            onClick={() => setSignalTableFilter(null)}
-            className="rounded-lg border border-gray-300 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+            onClick={() => {
+              setSignalTableFilter(null)
+              setStatusTableFilter(null)
+            }}
+            className="rounded-lg border border-gray-300 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-800"
           >
             Quitar filtro
           </button>
@@ -128,7 +142,7 @@ export function SensorsPage() {
       )}
 
       <>
-        <div className="rounded-xl border border-gray-200 bg-white">
+        <div className="rounded-xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-900">
           <DataTable
             isLoading={loading}
             columns={columns}
@@ -142,7 +156,7 @@ export function SensorsPage() {
               type="button"
               onClick={() => void loadMore()}
               disabled={loadingMore}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-800"
             >
               {loadingMore ? 'Cargando…' : 'Cargar más'}
             </button>
@@ -151,13 +165,15 @@ export function SensorsPage() {
       </>
 
       <RegisterSensorsModal
+        key={registerModalKey}
         open={registerOpen}
         onClose={closeRegister}
         text={registerText}
         onTextChange={setRegisterText}
+        existingTerminalIds={existingTerminalIds}
         busy={registerBusy}
         error={registerErr}
-        onSubmit={() => void handleBulkRegister()}
+        onSubmit={(ids) => void handleBulkRegister(ids)}
       />
 
       <ManageSensorModal

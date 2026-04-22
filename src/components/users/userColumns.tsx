@@ -26,7 +26,10 @@ export function buildUserColumns({
       key: 'email',
       header: 'Email',
       render: (user) => (
-        <Link to={`/users/${user.id}`} className="font-medium text-emerald-800 hover:underline">
+        <Link
+          to={`/users/${user.id}`}
+          className="font-medium text-emerald-800 hover:underline dark:text-emerald-400"
+        >
           {user.email}
         </Link>
       ),

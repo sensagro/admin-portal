@@ -201,7 +201,13 @@ export function SensorDetailPage() {
         key: 'hasWater',
         header: 'Agua',
         render: (r) =>
-          r.hasWater === null ? '—' : r.hasWater ? <span className="text-emerald-700">Sí</span> : <span className="text-red-600">No</span>,
+          r.hasWater === null ? (
+            '—'
+          ) : r.hasWater ? (
+            <span className="text-emerald-700 dark:text-emerald-400">Sí</span>
+          ) : (
+            <span className="text-red-600 dark:text-red-400">No</span>
+          ),
       },
       {
         key: 'batteryVoltage',
@@ -218,14 +224,17 @@ export function SensorDetailPage() {
   )
 
   if (loading) {
-    return <p className="text-sm text-gray-500">Cargando sensor…</p>
+    return <p className="text-sm text-gray-500 dark:text-gray-400">Cargando sensor…</p>
   }
 
   if (error || !detail) {
     return (
       <div>
-        <p className="text-sm text-red-600">{error ?? 'Sensor no encontrado'}</p>
-        <Link to="/sensors" className="mt-2 inline-block text-sm text-emerald-700 hover:underline">
+        <p className="text-sm text-red-600 dark:text-red-400">{error ?? 'Sensor no encontrado'}</p>
+        <Link
+          to="/sensors"
+          className="mt-2 inline-block text-sm text-emerald-700 hover:underline dark:text-emerald-400"
+        >
           ← Volver a sensores
         </Link>
       </div>
@@ -238,7 +247,10 @@ export function SensorDetailPage() {
   return (
     <>
       <div className="mb-6 flex items-start justify-between gap-4">
-        <Link to="/sensors" className="text-sm text-emerald-800 hover:underline">
+        <Link
+          to="/sensors"
+          className="text-sm text-emerald-800 hover:underline dark:text-emerald-400"
+        >
           ← Sensores
         </Link>
         {canMutate && (
@@ -251,7 +263,9 @@ export function SensorDetailPage() {
       {banner && (
         <div
           className={`mb-4 rounded-lg px-4 py-2 text-sm ${
-            banner.type === 'success' ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-600'
+            banner.type === 'success'
+              ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200'
+              : 'bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-300'
           }`}
         >
           {banner.text}
@@ -260,47 +274,56 @@ export function SensorDetailPage() {
 
       <div className="mb-6">
         <PageHeader title={detail.name} />
-        <p className="mt-1 font-mono text-sm text-gray-600">{detail.terminalId}</p>
+        <p className="mt-1 font-mono text-sm text-gray-600 dark:text-gray-400">{detail.terminalId}</p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <Badge label={st.label} variant={st.variant} />
-          <span className="text-sm text-gray-600">{typeLabels[detail.type] ?? detail.type}</span>
-          <span className="text-sm text-gray-500">Alta: {formatDate(detail.createdAt)}</span>
+          <span className="text-sm text-gray-600 dark:text-gray-300">
+            {typeLabels[detail.type] ?? detail.type}
+          </span>
+          <span className="text-sm text-gray-500 dark:text-gray-400">Alta: {formatDate(detail.createdAt)}</span>
         </div>
       </div>
 
-      <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4 text-sm">
-        <h3 className="mb-2 font-semibold text-gray-900">Propietario</h3>
+      <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4 text-sm dark:border-slate-700 dark:bg-slate-900">
+        <h3 className="mb-2 font-semibold text-gray-900 dark:text-gray-100">Propietario</h3>
         {detail.owner ? (
-          <Link to={`/users/${detail.owner.id}`} className="text-emerald-800 hover:underline">
+          <Link
+            to={`/users/${detail.owner.id}`}
+            className="text-emerald-800 hover:underline dark:text-emerald-400"
+          >
             {detail.owner.email}
           </Link>
         ) : (
-          <span className="text-gray-500">Sin asignar</span>
+          <span className="text-gray-500 dark:text-gray-400">Sin asignar</span>
         )}
       </div>
 
-      <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4 text-sm">
-        <h3 className="mb-2 font-semibold text-gray-900">Última lectura (resumen)</h3>
+      <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4 text-sm dark:border-slate-700 dark:bg-slate-900">
+        <h3 className="mb-2 font-semibold text-gray-900 dark:text-gray-100">Última lectura (resumen)</h3>
         <dl className="grid gap-2 sm:grid-cols-2">
           <div>
-            <dt className="text-gray-500">Última señal</dt>
-            <dd>{formatDate(detail.lastReadingAt)}</dd>
+            <dt className="text-gray-500 dark:text-gray-400">Última señal</dt>
+            <dd className="text-gray-800 dark:text-gray-200">{formatDate(detail.lastReadingAt)}</dd>
           </div>
           <div>
-            <dt className="text-gray-500">Batería</dt>
-            <dd>{formatBattery(detail.lastBatteryVoltage)}</dd>
+            <dt className="text-gray-500 dark:text-gray-400">Batería</dt>
+            <dd className="text-gray-800 dark:text-gray-200">{formatBattery(detail.lastBatteryVoltage)}</dd>
           </div>
           <div>
-            <dt className="text-gray-500">Temperatura</dt>
-            <dd>{detail.lastTemperature === null ? '—' : `${detail.lastTemperature} °C`}</dd>
+            <dt className="text-gray-500 dark:text-gray-400">Temperatura</dt>
+            <dd className="text-gray-800 dark:text-gray-200">
+              {detail.lastTemperature === null ? '—' : `${detail.lastTemperature} °C`}
+            </dd>
           </div>
           <div>
-            <dt className="text-gray-500">Elevación</dt>
-            <dd>{detail.lastElevation === null ? '—' : `${detail.lastElevation} m`}</dd>
+            <dt className="text-gray-500 dark:text-gray-400">Elevación</dt>
+            <dd className="text-gray-800 dark:text-gray-200">
+              {detail.lastElevation === null ? '—' : `${detail.lastElevation} m`}
+            </dd>
           </div>
           <div>
-            <dt className="text-gray-500">Agua (último alerta)</dt>
-            <dd>
+            <dt className="text-gray-500 dark:text-gray-400">Agua (último alerta)</dt>
+            <dd className="text-gray-800 dark:text-gray-200">
               {detail.lastAlertHasWater === null
                 ? '—'
                 : detail.lastAlertHasWater
@@ -311,8 +334,8 @@ export function SensorDetailPage() {
         </dl>
       </div>
 
-      <h2 className="mb-3 text-lg font-semibold text-gray-900">Últimas lecturas</h2>
-      <div className="rounded-xl border border-gray-200 bg-white">
+      <h2 className="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Últimas lecturas</h2>
+      <div className="rounded-xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-900">
         <DataTable columns={readingColumns} rows={detail.readings} keyExtractor={(r) => r.id} />
       </div>
 

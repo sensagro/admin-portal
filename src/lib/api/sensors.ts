@@ -1,4 +1,5 @@
 import type { SensorDetail, SensorSignalStatus } from '@/types'
+import type { SensorStatus } from '@/types'
 import type { AdminListResponse } from './admin-list'
 import { apiFetch } from './client'
 
@@ -16,16 +17,22 @@ export interface AdminSensorApiRow {
   silentSince?: string | null
 }
 
+export type FetchAdminSensorsOptions = {
+  status?: SensorStatus
+}
+
 export async function fetchAdminSensors(
   getIdToken: () => Promise<string | null>,
   limit = 200,
   cursor?: string,
   signalStatus?: SensorSignalStatus,
+  options?: FetchAdminSensorsOptions,
 ): Promise<AdminListResponse<AdminSensorApiRow>> {
   const params = new URLSearchParams()
   params.set('limit', String(limit))
   if (cursor) params.set('cursor', cursor)
   if (signalStatus) params.set('signalStatus', signalStatus)
+  if (options?.status) params.set('status', options.status)
   return apiFetch<AdminListResponse<AdminSensorApiRow>>(
     `/admin/sensors?${params.toString()}`,
     getIdToken,

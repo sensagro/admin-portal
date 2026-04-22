@@ -9,16 +9,16 @@ import { useAdminData } from '@/hooks/useAdminData'
 
 function AuditPayloadCell({ payload }: { payload: Record<string, unknown> | null }) {
   if (!payload) {
-    return <span className="text-gray-400">—</span>
+    return <span className="text-gray-400 dark:text-gray-500">—</span>
   }
   const compact = JSON.stringify(payload)
   const preview = compact.length > 64 ? `${compact.slice(0, 64)}…` : compact
   return (
     <details className="max-w-xs text-xs">
-      <summary className="cursor-pointer list-none text-gray-600 marker:hidden hover:text-gray-900 [&::-webkit-details-marker]:hidden">
+      <summary className="cursor-pointer list-none text-gray-600 marker:hidden hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 [&::-webkit-details-marker]:hidden">
         <span className="break-all font-mono">{preview}</span>
       </summary>
-      <pre className="mt-2 max-h-48 overflow-auto rounded-md bg-gray-50 p-2 font-mono text-[11px] leading-relaxed whitespace-pre-wrap break-all text-gray-800">
+      <pre className="mt-2 max-h-48 overflow-auto rounded-md bg-gray-50 p-2 font-mono text-[11px] leading-relaxed whitespace-pre-wrap break-all text-gray-800 dark:bg-slate-800 dark:text-gray-200">
         {JSON.stringify(payload, null, 2)}
       </pre>
     </details>
@@ -36,7 +36,9 @@ const columns: Column<AuditLog>[] = [
     key: 'action',
     header: 'Acción',
     render: (log) => (
-      <span className="rounded bg-gray-100 px-2 py-0.5 font-mono text-xs">{log.action}</span>
+      <span className="rounded bg-gray-100 px-2 py-0.5 font-mono text-xs dark:bg-slate-700 dark:text-gray-200">
+        {log.action}
+      </span>
     ),
   },
   {
@@ -96,10 +98,12 @@ export function AuditLogPage() {
         />
       </div>
       {error && (
-        <div className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">{error}</div>
+        <div className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600 dark:bg-red-950/50 dark:text-red-300">
+          {error}
+        </div>
       )}
       <>
-        <div className="rounded-xl border border-gray-200 bg-white">
+        <div className="rounded-xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-900">
           <DataTable
             isLoading={loading}
             columns={columns}
@@ -113,7 +117,7 @@ export function AuditLogPage() {
               type="button"
               onClick={() => void loadMore()}
               disabled={loadingMore}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-800"
             >
               {loadingMore ? 'Cargando…' : 'Cargar más'}
             </button>

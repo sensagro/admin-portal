@@ -8,13 +8,15 @@ import { Button } from '@/components/ui/Button'
 import { statusBadge } from './sensorColumns'
 
 const inputClass =
-  'w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600'
+  'w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100'
 
 function ActionSection({ title, hint, children }: { title: string; hint: ReactNode; children: ReactNode }) {
   return (
-    <div className="border-t border-gray-100 pt-3">
-      <div className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500">{title}</div>
-      <p className="mb-3 text-xs leading-relaxed text-gray-500">{hint}</p>
+    <div className="border-t border-gray-100 pt-3 dark:border-slate-700">
+      <div className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+        {title}
+      </div>
+      <p className="mb-3 text-xs leading-relaxed text-gray-500 dark:text-gray-400">{hint}</p>
       {children}
     </div>
   )
@@ -105,16 +107,18 @@ export function ManageSensorModal({
   return (
     <Modal open title="Gestionar sensor" onClose={onClose}>
       <div className="space-y-4">
-        <div className="rounded-lg bg-gray-50 px-3 py-2 text-sm">
-          <div className="font-mono text-gray-900">{sensor.terminalId}</div>
-          <div className="text-gray-700">{sensor.name}</div>
+        <div className="rounded-lg bg-gray-50 px-3 py-2 text-sm dark:bg-slate-800/60">
+          <div className="font-mono text-gray-900 dark:text-gray-100">{sensor.terminalId}</div>
+          <div className="text-gray-700 dark:text-gray-300">{sensor.name}</div>
           <div className="mt-1 flex flex-wrap items-center gap-2">
             <Badge label={statusBadge[sensor.status].label} variant={statusBadge[sensor.status].variant} />
-            {sensor.ownerEmail && <span className="text-gray-600">Propietario: {sensor.ownerEmail}</span>}
+            {sensor.ownerEmail && (
+              <span className="text-gray-600 dark:text-gray-400">Propietario: {sensor.ownerEmail}</span>
+            )}
           </div>
         </div>
 
-        {error && <div className="text-sm text-red-600">{error}</div>}
+        {error && <div className="text-sm text-red-600 dark:text-red-400">{error}</div>}
 
         {showAssign && (
           <ActionSection
@@ -220,7 +224,7 @@ export function ManageSensorModal({
           </Button>
         </ActionSection>
 
-        <div className="flex justify-end border-t border-gray-100 pt-3">
+        <div className="flex justify-end border-t border-gray-100 pt-3 dark:border-slate-700">
           <Button variant="secondary" onClick={onClose} disabled={busy}>
             Cerrar
           </Button>

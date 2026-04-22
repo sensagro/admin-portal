@@ -110,7 +110,10 @@ export function UserDetailPage() {
       key: 'terminalId',
       header: 'Terminal ID',
       render: (s) => (
-        <Link to={`/sensors/${s.id}`} className="font-mono text-xs text-emerald-800 hover:underline">
+        <Link
+          to={`/sensors/${s.id}`}
+          className="font-mono text-xs text-emerald-800 hover:underline dark:text-emerald-400"
+        >
           {s.terminalId}
         </Link>
       ),
@@ -127,14 +130,17 @@ export function UserDetailPage() {
   ]
 
   if (loading) {
-    return <p className="text-sm text-gray-500">Cargando usuario…</p>
+    return <p className="text-sm text-gray-500 dark:text-gray-400">Cargando usuario…</p>
   }
 
   if (error || !user) {
     return (
       <div>
-        <p className="text-sm text-red-600">{error ?? 'Usuario no encontrado'}</p>
-        <Link to="/users" className="mt-2 inline-block text-sm text-emerald-700 hover:underline">
+        <p className="text-sm text-red-600 dark:text-red-400">{error ?? 'Usuario no encontrado'}</p>
+        <Link
+          to="/users"
+          className="mt-2 inline-block text-sm text-emerald-700 hover:underline dark:text-emerald-400"
+        >
           ← Volver a usuarios
         </Link>
       </div>
@@ -147,7 +153,10 @@ export function UserDetailPage() {
   return (
     <>
       <div className="mb-6">
-        <Link to="/users" className="text-sm text-emerald-800 hover:underline">
+        <Link
+          to="/users"
+          className="text-sm text-emerald-800 hover:underline dark:text-emerald-400"
+        >
           ← Usuarios
         </Link>
       </div>
@@ -155,7 +164,9 @@ export function UserDetailPage() {
       {banner && (
         <div
           className={`mb-4 rounded-lg px-4 py-2 text-sm ${
-            banner.type === 'success' ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-600'
+            banner.type === 'success'
+              ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200'
+              : 'bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-300'
           }`}
         >
           {banner.text}
@@ -175,27 +186,31 @@ export function UserDetailPage() {
 
       <div className="mb-6 flex flex-wrap items-center gap-3 text-sm">
         <Badge label={badge.label} variant={badge.variant} />
-        <span className="text-gray-600">Registrado: {new Date(user.createdAt).toLocaleDateString('es-CR')}</span>
+        <span className="text-gray-600 dark:text-gray-300">
+          Registrado: {new Date(user.createdAt).toLocaleDateString('es-CR')}
+        </span>
       </div>
 
-      <h2 className="mb-3 text-lg font-semibold text-gray-900">Sensores asignados</h2>
-      <div className="mb-8 rounded-xl border border-gray-200 bg-white">
+      <h2 className="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Sensores asignados</h2>
+      <div className="mb-8 rounded-xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-900">
         <DataTable columns={sensorColumns} rows={user.ownedSensors} keyExtractor={(s) => s.id} />
       </div>
 
-      <h2 className="mb-3 text-lg font-semibold text-gray-900">Tokens de notificación push</h2>
-      <p className="mb-3 text-sm text-gray-600">{user.pushTokens.length} registrado(s)</p>
-      <div className="rounded-xl border border-gray-200 bg-white">
-        <ul className="divide-y divide-gray-100">
+      <h2 className="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Tokens de notificación push</h2>
+      <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">{user.pushTokens.length} registrado(s)</p>
+      <div className="rounded-xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+        <ul className="divide-y divide-gray-100 dark:divide-slate-800">
           {user.pushTokens.map((t) => (
             <li key={t.id} className="flex items-center justify-between px-4 py-3 text-sm">
-              <span className="font-mono text-xs text-gray-600">{t.id.slice(0, 12)}…</span>
-              <span className="text-gray-500">{new Date(t.createdAt).toLocaleString('es-CR')}</span>
+              <span className="font-mono text-xs text-gray-600 dark:text-gray-400">{t.id.slice(0, 12)}…</span>
+              <span className="text-gray-500 dark:text-gray-400">
+                {new Date(t.createdAt).toLocaleString('es-CR')}
+              </span>
             </li>
           ))}
         </ul>
         {user.pushTokens.length === 0 && (
-          <p className="px-4 py-6 text-sm text-gray-500">Sin tokens registrados.</p>
+          <p className="px-4 py-6 text-sm text-gray-500 dark:text-gray-400">Sin tokens registrados.</p>
         )}
       </div>
 

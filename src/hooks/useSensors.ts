@@ -12,10 +12,9 @@ import {
 } from '@/lib/api/sensors'
 import { fetchAdminUsers, type AdminUserRow } from '@/lib/api/users'
 import { mapSensorRow } from '@/lib/mappers/sensor'
-import { parseTerminalIds } from '@/utils/parseTerminalIds'
 import type { ConfirmKind } from '@/components/sensors/SensorConfirmModal'
 import { useFlash } from './useFlash'
-import type { Sensor, SensorSignalStatus } from '@/types'
+import type { Sensor, SensorSignalStatus, SensorStatus } from '@/types'
 import { useAdminTablePageSize } from '@/contexts/AdminTablePageSizeContext'
 
 export function useSensors() {
@@ -31,10 +30,11 @@ export function useSensors() {
   const [hasMore, setHasMore] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [total, setTotal] = useState<number | null>(null)
-  const [signalTableFilter, setSignalTableFilter] = useState<SensorSignalStatus | null>(
-    null,
-  )
+  const [signalTableFilter, setSignalTableFilterState] = useState<SensorSignalStatus | null>(null)
+  const [statusTableFilter, setStatusTableFilterState] = useState<SensorStatus | null>(null)
   const [fleetRefreshKey, setFleetRefreshKey] = useState(0)
+
+  const existingTerminalIds = useMemo(() => new Set(rows.map((r) => r.terminalId)), [rows])
 
   const bumpFleetRefresh = useCallback(() => {
     setFleetRefreshKey((k) => k + 1)
@@ -44,6 +44,7 @@ export function useSensors() {
   const [userFilter, setUserFilter] = useState('')
 
   const [registerOpen, setRegisterOpen] = useState(false)
+  const [registerModalKey, setRegisterModalKey] = useState(0)
   const [registerText, setRegisterText] = useState('')
   const [registerBusy, setRegisterBusy] = useState(false)
   const [registerErr, setRegisterErr] = useState<string | null>(null)
@@ -79,6 +80,7 @@ export function useSensors() {
         pageSize,
         undefined,
         signalTableFilter ?? undefined,
+        statusTableFilter ? { status: statusTableFilter } : undefined,
       )
       setRows(items.map(mapSensorRow))
       setTotal(t)
@@ -95,7 +97,7 @@ export function useSensors() {
     } finally {
       setLoading(false)
     }
-  }, [getIdToken, handleAuthError, pageSize, signalTableFilter])
+  }, [getIdToken, handleAuthError, pageSize, signalTableFilter, statusTableFilter])
 
   const loadMore = useCallback(async () => {
     if (!hasMore || loadingMore || loading) return
@@ -108,6 +110,7 @@ export function useSensors() {
         pageSize,
         cursor,
         signalTableFilter ?? undefined,
+        statusTableFilter ? { status: statusTableFilter } : undefined,
       )
       const chunk = items.map(mapSensorRow)
       const nextLen = rows.length + chunk.length
@@ -132,6 +135,7 @@ export function useSensors() {
     pageSize,
     rows.length,
     signalTableFilter,
+    statusTableFilter,
   ])
 
   const loadUsers = useCallback(async () => {
@@ -154,7 +158,10 @@ export function useSensors() {
     return users.filter((u) => u.email.toLowerCase().includes(q))
   }, [users, userFilter])
 
-  const openRegister = useCallback(() => setRegisterOpen(true), [])
+  const openRegister = useCallback(() => {
+    setRegisterModalKey((k) => k + 1)
+    setRegisterOpen(true)
+  }, [])
   const closeRegister = useCallback(() => {
     setRegisterOpen(false)
     setRegisterText('')
@@ -184,27 +191,29 @@ export function useSensors() {
     setConfirmErr(null)
   }, [])
 
-  const handleBulkRegister = useCallback(async () => {
-    const parsed = parseTerminalIds(registerText)
-    if (!parsed.ok) {
-      setRegisterErr(parsed.error)
-      return
-    }
-    setRegisterErr(null)
-    setRegisterBusy(true)
-    try {
-      const res = await bulkRegisterSensors(getIdToken, { terminalIds: parsed.ids, type: 'WATER_SENSOR' })
-      showFlash('success', `Se registraron ${res.registered} sensor(es).`)
-      closeRegister()
-      await reload()
-      bumpFleetRefresh()
-    } catch (e) {
-      if (await handleAuthError(e)) return
-      setRegisterErr(e instanceof Error ? e.message : 'Error al registrar')
-    } finally {
-      setRegisterBusy(false)
-    }
-  }, [registerText, getIdToken, showFlash, closeRegister, reload, handleAuthError, bumpFleetRefresh])
+  const handleBulkRegister = useCallback(
+    async (terminalIds: string[]) => {
+      if (terminalIds.length === 0) {
+        setRegisterErr('Nada que registrar.')
+        return
+      }
+      setRegisterErr(null)
+      setRegisterBusy(true)
+      try {
+        const res = await bulkRegisterSensors(getIdToken, { terminalIds, type: 'WATER_SENSOR' })
+        showFlash('success', `Se registraron ${res.registered} sensor(es).`)
+        closeRegister()
+        await reload()
+        bumpFleetRefresh()
+      } catch (e) {
+        if (await handleAuthError(e)) return
+        setRegisterErr(e instanceof Error ? e.message : 'Error al registrar')
+      } finally {
+        setRegisterBusy(false)
+      }
+    },
+    [getIdToken, showFlash, closeRegister, reload, handleAuthError, bumpFleetRefresh],
+  )
 
   const runManage = useCallback(
     async (fn: () => Promise<void>) => {
@@ -265,11 +274,24 @@ export function useSensors() {
     }
   }, [manageSensor, confirmKind, getIdToken, closeConfirmOnly, closeManage, reload, showFlash, handleAuthError, bumpFleetRefresh])
 
+  const setSignalTableFilterAndClearStatus = useCallback((v: SensorSignalStatus | null) => {
+    setStatusTableFilterState(null)
+    setSignalTableFilterState(v)
+  }, [])
+
+  const setStatusTableFilterAndClearSignal = useCallback((v: SensorStatus | null) => {
+    setSignalTableFilterState(null)
+    setStatusTableFilterState(v)
+  }, [])
+
   return {
     canMutate,
     rows,
+    existingTerminalIds,
     signalTableFilter,
-    setSignalTableFilter,
+    setSignalTableFilter: setSignalTableFilterAndClearStatus,
+    statusTableFilter,
+    setStatusTableFilter: setStatusTableFilterAndClearSignal,
     fleetRefreshKey,
     loading,
     error,
@@ -284,6 +306,7 @@ export function useSensors() {
     userFilter,
     setUserFilter,
     registerOpen,
+    registerModalKey,
     openRegister,
     closeRegister,
     registerText,

@@ -1,11 +1,13 @@
+import { useState } from 'react'
 import type { User, UserRole } from '@/types'
 import { Modal } from '@/components/ui/Modal'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { roleBadge } from './userColumns'
 
 const inputClass =
-  'w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600'
+  'w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100'
 
 const ROLE_OPTIONS: UserRole[] = ['FARMER', 'ADMIN', 'SUPPORT']
 
@@ -34,52 +36,92 @@ export function ChangeUserRoleModal({
   busy,
   error,
 }: ChangeUserRoleModalProps) {
+  const [showConfirm, setShowConfirm] = useState(false)
   if (!user) return null
 
   const currentBadge = roleBadge[user.role]
   const unchanged = selectedRole === user.role
 
   return (
-    <Modal open title="Cambiar rol" onClose={onClose}>
-      <p className="mb-1 text-sm text-gray-600">
-        Usuario: <span className="font-medium text-gray-900">{user.email}</span>
-      </p>
-      <p className="mb-4 flex flex-wrap items-center gap-2 text-sm text-gray-600">
-        Rol actual:
-        <Badge label={currentBadge.label} variant={currentBadge.variant} />
-      </p>
+    <>
+      <Modal open title="Cambiar rol" onClose={onClose}>
+        <p className="mb-1 text-sm text-gray-600 dark:text-gray-400">
+          Usuario: <span className="font-medium text-gray-900 dark:text-gray-100">{user.email}</span>
+        </p>
+        <p className="mb-4 flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+          Rol actual:
+          <Badge label={currentBadge.label} variant={currentBadge.variant} />
+        </p>
 
-      <label htmlFor="user-role-select" className="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-500">
-        Nuevo rol
-      </label>
-      <select
-        id="user-role-select"
-        className={`mb-4 ${inputClass}`}
-        value={selectedRole}
-        onChange={(e) => onSelectedRoleChange(e.target.value as UserRole)}
-        disabled={busy}
-      >
-        {ROLE_OPTIONS.map((r) => (
-          <option key={r} value={r}>
-            {roleOptionLabel[r]}
-          </option>
-        ))}
-      </select>
+        <label
+          htmlFor="user-role-select"
+          className="mb-1 block text-xs font-medium tracking-wide text-gray-500 dark:text-gray-400"
+        >
+          Nuevo rol
+        </label>
+        <select
+          id="user-role-select"
+          className={`mb-4 ${inputClass}`}
+          value={selectedRole}
+          onChange={(e) => onSelectedRoleChange(e.target.value as UserRole)}
+          disabled={busy}
+        >
+          {ROLE_OPTIONS.map((r) => (
+            <option key={r} value={r}>
+              {roleOptionLabel[r]}
+            </option>
+          ))}
+        </select>
 
-      <p className="mb-4 text-xs leading-relaxed text-gray-500">
-        Los permisos del usuario se actualizan en el sistema y en Firebase. No puedes cambiar tu propio rol desde aquí.
-      </p>
+        <p className="mb-4 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+          Los permisos del usuario se actualizan en el sistema y en Firebase. No puedes cambiar tu propio rol desde
+          aquí.
+        </p>
 
-      {error && <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</div>}
+        {error && (
+          <div className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-950/50 dark:text-red-300">
+            {error}
+          </div>
+        )}
 
-      <div className="flex flex-wrap justify-end gap-2">
-        <Button variant="secondary" onClick={onClose} disabled={busy}>
-          Cancelar
-        </Button>
-        <Button variant="primary" onClick={onSave} disabled={busy || unchanged}>
-          Guardar
-        </Button>
-      </div>
-    </Modal>
+        <div className="flex flex-wrap justify-end gap-2">
+          <Button variant="secondary" onClick={onClose} disabled={busy}>
+            Cancelar
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => setShowConfirm(true)}
+            disabled={busy || unchanged}
+          >
+            Guardar
+          </Button>
+        </div>
+      </Modal>
+
+      <ConfirmDialog
+        open={showConfirm}
+        title="Confirmar cambio de rol"
+        entityLabel={user.email}
+        body={
+          <>
+            <p>
+              El rol pasará de <strong>{roleOptionLabel[user.role]}</strong> a{' '}
+              <strong>{roleOptionLabel[selectedRole]}</strong>.
+            </p>
+            <p>Se actualizan la base de datos y las reclamaciones de Firebase para este usuario.</p>
+          </>
+        }
+        reversibility="reversible"
+        confirmLabel="Confirmar"
+        onConfirm={() => {
+          setShowConfirm(false)
+          onSave()
+        }}
+        onCancel={() => setShowConfirm(false)}
+        loading={busy}
+        error={null}
+        confirmTone="default"
+      />
+    </>
   )
 }
