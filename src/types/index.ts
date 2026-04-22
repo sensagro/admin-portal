@@ -8,6 +8,9 @@ export type SensorStatus =
 
 export type SensorType = 'WATER_SENSOR'
 
+/** Derived from lastReadingAt vs silent threshold (aligned with backend). */
+export type SensorSignalStatus = 'FRESH' | 'NEVER_REPORTED' | 'SILENT'
+
 export interface User {
   id: string
   email: string
@@ -30,6 +33,8 @@ export interface Sensor {
   lastElevation?: number | null
   lastAlertHasWater?: boolean | null
   createdAt: string
+  signalStatus?: SensorSignalStatus
+  silentSince?: string | null
 }
 
 export interface AuditLog {

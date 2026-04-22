@@ -1,4 +1,4 @@
-import type { SensorDetail } from '@/types'
+import type { SensorDetail, SensorSignalStatus } from '@/types'
 import type { AdminListResponse } from './admin-list'
 import { apiFetch } from './client'
 
@@ -12,15 +12,24 @@ export interface AdminSensorApiRow {
   lastBatteryVoltage: number | null
   createdAt: string
   owner: { id: string; email: string } | null
+  signalStatus?: SensorSignalStatus
+  silentSince?: string | null
 }
 
 export async function fetchAdminSensors(
   getIdToken: () => Promise<string | null>,
   limit = 200,
   cursor?: string,
+  signalStatus?: SensorSignalStatus,
 ): Promise<AdminListResponse<AdminSensorApiRow>> {
-  const q = `/admin/sensors?limit=${limit}${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`
-  return apiFetch<AdminListResponse<AdminSensorApiRow>>(q, getIdToken)
+  const params = new URLSearchParams()
+  params.set('limit', String(limit))
+  if (cursor) params.set('cursor', cursor)
+  if (signalStatus) params.set('signalStatus', signalStatus)
+  return apiFetch<AdminListResponse<AdminSensorApiRow>>(
+    `/admin/sensors?${params.toString()}`,
+    getIdToken,
+  )
 }
 
 export interface BulkRegisterSensorsResult {

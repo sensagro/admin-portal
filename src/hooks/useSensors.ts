@@ -15,7 +15,7 @@ import { mapSensorRow } from '@/lib/mappers/sensor'
 import { parseTerminalIds } from '@/utils/parseTerminalIds'
 import type { ConfirmKind } from '@/components/sensors/SensorConfirmModal'
 import { useFlash } from './useFlash'
-import type { Sensor } from '@/types'
+import type { Sensor, SensorSignalStatus } from '@/types'
 import { useAdminTablePageSize } from '@/contexts/AdminTablePageSizeContext'
 
 export function useSensors() {
@@ -31,6 +31,14 @@ export function useSensors() {
   const [hasMore, setHasMore] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [total, setTotal] = useState<number | null>(null)
+  const [signalTableFilter, setSignalTableFilter] = useState<SensorSignalStatus | null>(
+    null,
+  )
+  const [fleetRefreshKey, setFleetRefreshKey] = useState(0)
+
+  const bumpFleetRefresh = useCallback(() => {
+    setFleetRefreshKey((k) => k + 1)
+  }, [])
 
   const [users, setUsers] = useState<AdminUserRow[]>([])
   const [userFilter, setUserFilter] = useState('')
@@ -66,7 +74,12 @@ export function useSensors() {
     setLoadingMore(false)
     setError(null)
     try {
-      const { items, total: t } = await fetchAdminSensors(getIdToken, pageSize)
+      const { items, total: t } = await fetchAdminSensors(
+        getIdToken,
+        pageSize,
+        undefined,
+        signalTableFilter ?? undefined,
+      )
       setRows(items.map(mapSensorRow))
       setTotal(t)
       const loaded = items.length
@@ -82,7 +95,7 @@ export function useSensors() {
     } finally {
       setLoading(false)
     }
-  }, [getIdToken, handleAuthError, pageSize])
+  }, [getIdToken, handleAuthError, pageSize, signalTableFilter])
 
   const loadMore = useCallback(async () => {
     if (!hasMore || loadingMore || loading) return
@@ -90,7 +103,12 @@ export function useSensors() {
     setLoadingMore(true)
     setError(null)
     try {
-      const { items, total: t } = await fetchAdminSensors(getIdToken, pageSize, cursor)
+      const { items, total: t } = await fetchAdminSensors(
+        getIdToken,
+        pageSize,
+        cursor,
+        signalTableFilter ?? undefined,
+      )
       const chunk = items.map(mapSensorRow)
       const nextLen = rows.length + chunk.length
       setRows((prev) => [...prev, ...chunk])
@@ -104,7 +122,17 @@ export function useSensors() {
     } finally {
       setLoadingMore(false)
     }
-  }, [getIdToken, handleAuthError, hasMore, loadingMore, loading, cursor, pageSize, rows.length])
+  }, [
+    getIdToken,
+    handleAuthError,
+    hasMore,
+    loadingMore,
+    loading,
+    cursor,
+    pageSize,
+    rows.length,
+    signalTableFilter,
+  ])
 
   const loadUsers = useCallback(async () => {
     if (!canMutate) return
@@ -169,13 +197,14 @@ export function useSensors() {
       showFlash('success', `Se registraron ${res.registered} sensor(es).`)
       closeRegister()
       await reload()
+      bumpFleetRefresh()
     } catch (e) {
       if (await handleAuthError(e)) return
       setRegisterErr(e instanceof Error ? e.message : 'Error al registrar')
     } finally {
       setRegisterBusy(false)
     }
-  }, [registerText, getIdToken, showFlash, closeRegister, reload, handleAuthError])
+  }, [registerText, getIdToken, showFlash, closeRegister, reload, handleAuthError, bumpFleetRefresh])
 
   const runManage = useCallback(
     async (fn: () => Promise<void>) => {
@@ -185,6 +214,7 @@ export function useSensors() {
         await fn()
         closeManage()
         await reload()
+        bumpFleetRefresh()
         showFlash('success', 'Cambio aplicado.')
       } catch (e) {
         if (await handleAuthError(e)) return
@@ -193,7 +223,7 @@ export function useSensors() {
         setManageBusy(false)
       }
     },
-    [closeManage, reload, showFlash, handleAuthError],
+    [closeManage, reload, showFlash, handleAuthError, bumpFleetRefresh],
   )
 
   const handleAssign = useCallback(async () => {
@@ -225,6 +255,7 @@ export function useSensors() {
       closeConfirmOnly()
       closeManage()
       await reload()
+      bumpFleetRefresh()
       showFlash('success', 'Cambio aplicado.')
     } catch (e) {
       if (await handleAuthError(e)) return
@@ -232,11 +263,14 @@ export function useSensors() {
     } finally {
       setConfirmBusy(false)
     }
-  }, [manageSensor, confirmKind, getIdToken, closeConfirmOnly, closeManage, reload, showFlash, handleAuthError])
+  }, [manageSensor, confirmKind, getIdToken, closeConfirmOnly, closeManage, reload, showFlash, handleAuthError, bumpFleetRefresh])
 
   return {
     canMutate,
     rows,
+    signalTableFilter,
+    setSignalTableFilter,
+    fleetRefreshKey,
     loading,
     error,
     hasMore,

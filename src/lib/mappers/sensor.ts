@@ -13,6 +13,8 @@ export function mapSensorRow(row: AdminSensorApiRow): Sensor {
     lastReadingAt: row.lastReadingAt,
     lastBatteryVoltage: row.lastBatteryVoltage,
     createdAt: row.createdAt,
+    signalStatus: row.signalStatus,
+    silentSince: row.silentSince ?? null,
   }
 }
 
@@ -31,5 +33,7 @@ export function mapSensorDetailToSensor(d: SensorDetail): Sensor {
     lastElevation: d.lastElevation,
     lastAlertHasWater: d.lastAlertHasWater,
     createdAt: d.createdAt,
+    signalStatus: d.signalStatus,
+    silentSince: d.silentSince ?? null,
   }
 }

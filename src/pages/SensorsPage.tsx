@@ -7,12 +7,16 @@ import { RegisterSensorsModal } from '@/components/sensors/RegisterSensorsModal'
 import { ManageSensorModal } from '@/components/sensors/ManageSensorModal'
 import { SensorConfirmModal } from '@/components/sensors/SensorConfirmModal'
 import { buildSensorColumns } from '@/components/sensors/sensorColumns'
+import { FleetSignalCard } from '@/components/sensors/FleetSignalCard'
 import { useSensors } from '@/hooks/useSensors'
 
 export function SensorsPage() {
   const {
     canMutate,
     rows,
+    signalTableFilter,
+    setSignalTableFilter,
+    fleetRefreshKey,
     loading,
     error,
     hasMore,
@@ -93,6 +97,34 @@ export function SensorsPage() {
 
       {error && (
         <div className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">{error}</div>
+      )}
+
+      <FleetSignalCard
+        refreshKey={fleetRefreshKey}
+        onApplyTableFilter={(status) => setSignalTableFilter(status)}
+        onOpenSensor={openManage}
+      />
+
+      {signalTableFilter && (
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <span className="text-sm text-gray-600">
+            Filtro:{' '}
+            <strong>
+              {signalTableFilter === 'SILENT'
+                ? 'Sin señal'
+                : signalTableFilter === 'NEVER_REPORTED'
+                  ? 'Esperando primera lectura'
+                  : 'Señal reciente'}
+            </strong>
+          </span>
+          <button
+            type="button"
+            onClick={() => setSignalTableFilter(null)}
+            className="rounded-lg border border-gray-300 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Quitar filtro
+          </button>
+        </div>
       )}
 
       <>
