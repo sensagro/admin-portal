@@ -15,6 +15,7 @@ export function mapSensorRow(row: AdminSensorApiRow): Sensor {
     createdAt: row.createdAt,
     signalStatus: row.signalStatus,
     silentSince: row.silentSince ?? null,
+    suspendedByUserSuspension: row.suspendedByUserSuspension,
   }
 }
 
@@ -35,5 +36,6 @@ export function mapSensorDetailToSensor(d: SensorDetail): Sensor {
     createdAt: d.createdAt,
     signalStatus: d.signalStatus,
     silentSince: d.silentSince ?? null,
+    suspendedByUserSuspension: d.suspendedByUserSuspension,
   }
 }

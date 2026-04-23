@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { ApiError } from '@/lib/api'
 import { fetchAdminUser, patchUserRole } from '@/lib/api/users'
+import { useUserSuspendFlow } from '@/hooks/useUsers'
 import type { User, UserDetail, UserRole } from '@/types'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { DataTable } from '@/components/ui/DataTable'
@@ -13,6 +14,7 @@ import { ChangeUserRoleModal } from '@/components/users/ChangeUserRoleModal'
 import { roleBadge } from '@/components/users/userColumns'
 import { statusBadge } from '@/components/sensors/sensorColumns'
 import { useFlash } from '@/hooks/useFlash'
+import { SuspendUserModal } from '@/components/users/SuspendUserModal'
 
 const ALL_ROLES: UserRole[] = ['FARMER', 'ADMIN', 'SUPPORT']
 
@@ -24,6 +26,7 @@ export function UserDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { me, getIdToken, signOut } = useAuth()
   const canChangeRole = me?.role === 'ADMIN'
+  const canSuspendUser = me?.role === 'ADMIN'
   const { banner, showFlash } = useFlash()
 
   const [user, setUser] = useState<UserDetail | null>(null)
@@ -54,6 +57,13 @@ export function UserDetailPage() {
     }
   }, [id, getIdToken, signOut])
 
+  const suspendFlow = useUserSuspendFlow({
+    getIdToken,
+    signOut,
+    onSuccess: load,
+    showFlash,
+  })
+
   useEffect(() => {
     void load()
   }, [load])
@@ -66,6 +76,7 @@ export function UserDetailPage() {
       role: user.role,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
+      suspendedAt: user.suspendedAt ?? null,
     }
     setRoleTarget(u)
     setPendingRole(firstAlternativeRole(user.role))
@@ -124,7 +135,19 @@ export function UserDetailPage() {
       header: 'Estado',
       render: (s) => {
         const badge = statusBadge[s.status]
-        return <Badge label={badge.label} variant={badge.variant} />
+        return (
+          <span className="flex flex-wrap items-center gap-2">
+            <Badge label={badge.label} variant={badge.variant} />
+            {s.suspendedByUserSuspension ? (
+              <span
+                className="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600 dark:bg-slate-800 dark:text-gray-400"
+                title="Suspendido por baja de usuario"
+              >
+                Baja usuario
+              </span>
+            ) : null}
+          </span>
+        )
       },
     },
   ]
@@ -149,6 +172,9 @@ export function UserDetailPage() {
 
   const self = user.id === me?.id
   const badge = roleBadge[user.role]
+  const isAdminTarget = user.role === 'ADMIN'
+  const assignedForSuspendCount = user.ownedSensors.filter((s) => s.status === 'ASSIGNED').length
+  const liftOnReactivateCount = user.suspendedSensorCount ?? 0
 
   return (
     <>
@@ -174,14 +200,47 @@ export function UserDetailPage() {
       )}
 
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <PageHeader title={user.email} />
-        {canChangeRole && (
-          <span title={self ? 'No puedes cambiar tu propio rol' : undefined}>
-            <Button variant="secondary" disabled={self} onClick={openRoleModal}>
-              Cambiar rol
-            </Button>
-          </span>
-        )}
+        <div className="min-w-0">
+          <PageHeader title={user.email} />
+          {user.suspendedAt ? (
+            <div className="mt-2">
+              <Badge
+                label={`Suspendido · ${new Date(user.suspendedAt).toLocaleDateString('es-CR')}`}
+                variant="gray"
+              />
+            </div>
+          ) : null}
+        </div>
+        <div className="flex flex-shrink-0 flex-wrap gap-2">
+          {canChangeRole && (
+            <span title={self ? 'No puedes cambiar tu propio rol' : undefined}>
+              <Button variant="secondary" disabled={self} onClick={openRoleModal}>
+                Cambiar rol
+              </Button>
+            </span>
+          )}
+          {canSuspendUser && !self && !isAdminTarget ? (
+            user.suspendedAt ? (
+              <Button
+                variant="primary"
+                onClick={() =>
+                  suspendFlow.openReactivateUser(user.id, user.email, liftOnReactivateCount)
+                }
+              >
+                Reactivar usuario
+              </Button>
+            ) : (
+              <Button
+                variant="danger"
+                onClick={() =>
+                  suspendFlow.openSuspendUser(user.id, user.email, assignedForSuspendCount)
+                }
+              >
+                Suspender usuario
+              </Button>
+            )
+          ) : null}
+        </div>
       </div>
 
       <div className="mb-6 flex flex-wrap items-center gap-3 text-sm">
@@ -222,6 +281,17 @@ export function UserDetailPage() {
         onSave={() => void saveRole()}
         busy={roleBusy}
         error={roleError}
+      />
+
+      <SuspendUserModal
+        open={suspendFlow.suspendModalOpen}
+        kind={suspendFlow.suspendModalKind}
+        userEmail={suspendFlow.suspendModalEmail}
+        sensorCount={suspendFlow.suspendModalSensorCount}
+        loading={suspendFlow.suspendModalBusy}
+        error={suspendFlow.suspendModalError}
+        onConfirm={() => void suspendFlow.executeSuspendOrReactivate()}
+        onCancel={suspendFlow.closeSuspendModal}
       />
     </>
   )

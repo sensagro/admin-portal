@@ -15,6 +15,7 @@ export interface AdminSensorApiRow {
   owner: { id: string; email: string } | null
   signalStatus?: SensorSignalStatus
   silentSince?: string | null
+  suspendedByUserSuspension?: boolean
 }
 
 export type FetchAdminSensorsOptions = {

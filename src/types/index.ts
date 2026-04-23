@@ -17,6 +17,8 @@ export interface User {
   role: UserRole
   createdAt: string
   updatedAt: string
+  /** Present on admin user list/detail when the account is sensor-suspended. */
+  suspendedAt?: string | null
 }
 
 export interface Sensor {
@@ -35,6 +37,8 @@ export interface Sensor {
   createdAt: string
   signalStatus?: SensorSignalStatus
   silentSince?: string | null
+  /** Admin-only: bulk user suspension provenance. */
+  suspendedByUserSuspension?: boolean
 }
 
 export interface AuditLog {
@@ -48,7 +52,10 @@ export interface AuditLog {
 }
 
 export interface UserDetail extends User {
-  ownedSensors: Pick<Sensor, 'id' | 'terminalId' | 'name' | 'status'>[]
+  suspendedSensorCount?: number
+  ownedSensors: (Pick<Sensor, 'id' | 'terminalId' | 'name' | 'status'> & {
+    suspendedByUserSuspension?: boolean
+  })[]
   pushTokens: { id: string; createdAt: string }[]
 }
 

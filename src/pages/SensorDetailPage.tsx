@@ -276,7 +276,15 @@ export function SensorDetailPage() {
         <PageHeader title={detail.name} />
         <p className="mt-1 font-mono text-sm text-gray-600 dark:text-gray-400">{detail.terminalId}</p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <Badge label={st.label} variant={st.variant} />
+          <Badge
+            label={st.label}
+            variant={st.variant}
+            title={
+              detail.suspendedByUserSuspension
+                ? 'Suspendido por baja de usuario'
+                : undefined
+            }
+          />
           <span className="text-sm text-gray-600 dark:text-gray-300">
             {typeLabels[detail.type] ?? detail.type}
           </span>

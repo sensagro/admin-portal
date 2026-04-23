@@ -26,12 +26,15 @@ export function buildUserColumns({
       key: 'email',
       header: 'Email',
       render: (user) => (
-        <Link
-          to={`/users/${user.id}`}
-          className="font-medium text-emerald-800 hover:underline dark:text-emerald-400"
-        >
-          {user.email}
-        </Link>
+        <span className="flex flex-wrap items-center gap-2">
+          <Link
+            to={`/users/${user.id}`}
+            className="font-medium text-emerald-800 hover:underline dark:text-emerald-400"
+          >
+            {user.email}
+          </Link>
+          {user.suspendedAt ? <Badge label="Suspendido" variant="gray" /> : null}
+        </span>
       ),
     },
     {

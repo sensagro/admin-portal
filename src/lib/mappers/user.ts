@@ -8,5 +8,6 @@ export function mapUserRow(row: AdminUserRow): User {
     role: row.role,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+    suspendedAt: row.suspendedAt ?? null,
   }
 }

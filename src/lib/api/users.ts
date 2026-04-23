@@ -21,6 +21,13 @@ export interface AdminUserRow {
   role: UserRole
   createdAt: string
   updatedAt: string
+  suspendedAt: string | null
+}
+
+export interface UserSuspendResponse {
+  id: string
+  suspendedAt: string | null
+  affectedSensorCount: number
 }
 
 export async function fetchAdminUsers(
@@ -52,4 +59,26 @@ export async function fetchAdminUser(
   getIdToken: () => Promise<string | null>,
 ): Promise<UserDetail> {
   return apiFetch<UserDetail>(`/admin/users/${encodeURIComponent(userId)}`, getIdToken)
+}
+
+export async function suspendUser(
+  getIdToken: () => Promise<string | null>,
+  userId: string,
+): Promise<UserSuspendResponse> {
+  return apiFetch<UserSuspendResponse>(
+    `/admin/users/${encodeURIComponent(userId)}/suspend`,
+    getIdToken,
+    { method: 'POST' },
+  )
+}
+
+export async function reactivateUser(
+  getIdToken: () => Promise<string | null>,
+  userId: string,
+): Promise<UserSuspendResponse> {
+  return apiFetch<UserSuspendResponse>(
+    `/admin/users/${encodeURIComponent(userId)}/reactivate`,
+    getIdToken,
+    { method: 'POST' },
+  )
 }

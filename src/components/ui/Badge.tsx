@@ -1,6 +1,7 @@
 interface BadgeProps {
   label: string
   variant: 'green' | 'gray' | 'yellow' | 'red' | 'blue'
+  title?: string
 }
 
 const variantClasses: Record<BadgeProps['variant'], string> = {
@@ -13,9 +14,10 @@ const variantClasses: Record<BadgeProps['variant'], string> = {
   blue: 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300',
 }
 
-export function Badge({ label, variant }: BadgeProps) {
+export function Badge({ label, variant, title }: BadgeProps) {
   return (
     <span
+      title={title}
       className={`inline-block rounded-full px-3 py-0.5 text-xs font-medium ${variantClasses[variant]}`}
     >
       {label}
