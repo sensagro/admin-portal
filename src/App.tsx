@@ -7,6 +7,7 @@ import { UserDetailPage } from '@/pages/UserDetailPage'
 import { SensorsPage } from '@/pages/SensorsPage'
 import { SensorDetailPage } from '@/pages/SensorDetailPage'
 import { AuditLogPage } from '@/pages/AuditLogPage'
+import { DashboardPage } from '@/pages/DashboardPage'
 import { AdminTablePageSizeProvider } from '@/contexts/AdminTablePageSizeContext'
 
 export default function App() {
@@ -28,13 +29,14 @@ export default function App() {
     <MainLayout onLogout={() => void signOut()}>
       <AdminTablePageSizeProvider>
         <Routes>
-          <Route path="/" element={<Navigate to="/users" replace />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/users" element={<UsersPage />} />
           <Route path="/users/:id" element={<UserDetailPage />} />
           <Route path="/sensors" element={<SensorsPage />} />
           <Route path="/sensors/:id" element={<SensorDetailPage />} />
           <Route path="/audit" element={<AuditLogPage />} />
-          <Route path="*" element={<Navigate to="/users" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </AdminTablePageSizeProvider>
     </MainLayout>

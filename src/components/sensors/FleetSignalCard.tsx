@@ -73,7 +73,10 @@ export function FleetSignalCard({
       const [silentRes, neverRes, unassignedRes] = await Promise.all([
         fetchAdminSensors(getIdToken, FLEET_PREVIEW_LIMIT, undefined, 'SILENT'),
         fetchAdminSensors(getIdToken, FLEET_PREVIEW_LIMIT, undefined, 'NEVER_REPORTED'),
-        fetchAdminSensors(getIdToken, FLEET_PREVIEW_LIMIT, undefined, undefined, { status: 'UNASSIGNED' }),
+        fetchAdminSensors(getIdToken, FLEET_PREVIEW_LIMIT, undefined, undefined, {
+          status: 'UNASSIGNED',
+          orderBy: 'unassignedAt:desc',
+        }),
       ])
       setSilent({
         items: sortSilentRows(silentRes.items).slice(0, ROWS_SHOWN),
@@ -84,7 +87,7 @@ export function FleetSignalCard({
         total: neverRes.total,
       })
       setUnassigned({
-        items: sortNeverRows(unassignedRes.items).slice(0, ROWS_SHOWN),
+        items: unassignedRes.items.slice(0, ROWS_SHOWN),
         total: unassignedRes.total,
       })
     } catch (e) {

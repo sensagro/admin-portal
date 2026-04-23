@@ -1,4 +1,14 @@
-import { ClipboardList, LogOut, Monitor, Moon, Radio, Sun, Users, type LucideIcon } from 'lucide-react'
+import {
+  ClipboardList,
+  LayoutDashboard,
+  LogOut,
+  Monitor,
+  Moon,
+  Radio,
+  Sun,
+  Users,
+  type LucideIcon,
+} from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
@@ -8,6 +18,7 @@ interface SidebarProps {
 }
 
 const navItems: { path: string; label: string; Icon: LucideIcon }[] = [
+  { path: '/dashboard', label: 'Panel', Icon: LayoutDashboard },
   { path: '/users', label: 'Usuarios', Icon: Users },
   { path: '/sensors', label: 'Sensores', Icon: Radio },
   { path: '/audit', label: 'Auditoría', Icon: ClipboardList },

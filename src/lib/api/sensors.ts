@@ -3,6 +3,8 @@ import type { SensorStatus } from '@/types'
 import type { AdminListResponse } from './admin-list'
 import { apiFetch } from './client'
 
+export type AdminSensorListOrderBy = 'createdAt:desc' | 'unassignedAt:desc'
+
 export interface AdminSensorApiRow {
   id: string
   terminalId: string
@@ -12,6 +14,7 @@ export interface AdminSensorApiRow {
   lastReadingAt: string | null
   lastBatteryVoltage: number | null
   createdAt: string
+  unassignedAt?: string | null
   owner: { id: string; email: string } | null
   signalStatus?: SensorSignalStatus
   silentSince?: string | null
@@ -20,6 +23,7 @@ export interface AdminSensorApiRow {
 
 export type FetchAdminSensorsOptions = {
   status?: SensorStatus
+  orderBy?: AdminSensorListOrderBy
 }
 
 export async function fetchAdminSensors(
@@ -34,6 +38,7 @@ export async function fetchAdminSensors(
   if (cursor) params.set('cursor', cursor)
   if (signalStatus) params.set('signalStatus', signalStatus)
   if (options?.status) params.set('status', options.status)
+  if (options?.orderBy) params.set('orderBy', options.orderBy)
   return apiFetch<AdminListResponse<AdminSensorApiRow>>(
     `/admin/sensors?${params.toString()}`,
     getIdToken,

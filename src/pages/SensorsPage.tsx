@@ -1,4 +1,5 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { PageSizeSelect } from '@/components/ui/PageSizeSelect'
 import { Button } from '@/components/ui/Button'
@@ -9,8 +10,11 @@ import { SensorConfirmModal } from '@/components/sensors/SensorConfirmModal'
 import { buildSensorColumns } from '@/components/sensors/sensorColumns'
 import { FleetSignalCard } from '@/components/sensors/FleetSignalCard'
 import { useSensors } from '@/hooks/useSensors'
+import type { SensorSignalStatus, SensorStatus } from '@/types'
 
 export function SensorsPage() {
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   const {
     canMutate,
     rows,
@@ -59,6 +63,27 @@ export function SensorsPage() {
     closeConfirmOnly,
     executeConfirmedAction,
   } = useSensors()
+
+  useEffect(() => {
+    const sig = searchParams.get('signalStatus')
+    const st = searchParams.get('status')
+    const validSig =
+      sig === 'SILENT' || sig === 'NEVER_REPORTED' || sig === 'FRESH'
+    const validSt =
+      st === 'UNASSIGNED' ||
+      st === 'ASSIGNED' ||
+      st === 'SUSPENDED' ||
+      st === 'DECOMMISSIONED'
+
+    if (validSig) {
+      setSignalTableFilter(sig as SensorSignalStatus)
+    } else if (validSt) {
+      setStatusTableFilter(st as SensorStatus)
+    } else {
+      setSignalTableFilter(null)
+      setStatusTableFilter(null)
+    }
+  }, [searchParams, setSignalTableFilter, setStatusTableFilter])
 
   const columns = useMemo(
     () => buildSensorColumns({ canMutate, onManage: openManage }),
@@ -132,7 +157,7 @@ export function SensorsPage() {
             type="button"
             onClick={() => {
               setSignalTableFilter(null)
-              setStatusTableFilter(null)
+              navigate('/sensors', { replace: true })
             }}
             className="rounded-lg border border-gray-300 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-800"
           >
