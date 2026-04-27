@@ -13,4 +13,7 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  define: {
+    __GIT_SHA__: JSON.stringify(process.env.GIT_SHA ?? 'dev'),
+  },
 })
