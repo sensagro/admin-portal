@@ -7,7 +7,7 @@ export function mapAuditRow(row: AuditLogApiRow): AuditLog {
     action: row.action,
     entityType: row.entityType,
     entityId: row.entityId,
-    actorEmail: row.actor.email,
+    actorEmail: row.actor?.email ?? 'Sistema',
     payload: row.payload,
     createdAt: row.createdAt,
   }

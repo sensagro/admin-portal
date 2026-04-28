@@ -9,7 +9,7 @@ export interface AuditLogApiRow {
   entityId: string
   payload: Record<string, unknown> | null
   createdAt: string
-  actor: { id: string; email: string; role: UserRole }
+  actor: { id: string; email: string; role: UserRole } | null
 }
 
 export type FetchAuditLogsOptions = {
