@@ -9,6 +9,7 @@ import {
   suspendSensor,
   transferSensor,
   unassignSensor,
+  type SensorRegistrationItem,
 } from '@/lib/api/sensors'
 import { fetchAdminUsers, type AdminUserRow } from '@/lib/api/users'
 import { mapSensorRow } from '@/lib/mappers/sensor'
@@ -45,7 +46,6 @@ export function useSensors() {
 
   const [registerOpen, setRegisterOpen] = useState(false)
   const [registerModalKey, setRegisterModalKey] = useState(0)
-  const [registerText, setRegisterText] = useState('')
   const [registerBusy, setRegisterBusy] = useState(false)
   const [registerErr, setRegisterErr] = useState<string | null>(null)
 
@@ -164,7 +164,6 @@ export function useSensors() {
   }, [])
   const closeRegister = useCallback(() => {
     setRegisterOpen(false)
-    setRegisterText('')
     setRegisterErr(null)
   }, [])
 
@@ -192,15 +191,15 @@ export function useSensors() {
   }, [])
 
   const handleBulkRegister = useCallback(
-    async (terminalIds: string[]) => {
-      if (terminalIds.length === 0) {
+    async (sensors: SensorRegistrationItem[]) => {
+      if (sensors.length === 0) {
         setRegisterErr('Nada que registrar.')
         return
       }
       setRegisterErr(null)
       setRegisterBusy(true)
       try {
-        const res = await bulkRegisterSensors(getIdToken, { terminalIds, type: 'WATER_SENSOR' })
+        const res = await bulkRegisterSensors(getIdToken, { sensors })
         showFlash('success', `Se registraron ${res.registered} sensor(es).`)
         closeRegister()
         await reload()
@@ -309,8 +308,6 @@ export function useSensors() {
     registerModalKey,
     openRegister,
     closeRegister,
-    registerText,
-    setRegisterText,
     registerBusy,
     registerErr,
     handleBulkRegister,

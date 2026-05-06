@@ -2,7 +2,7 @@
 
 Internal web app for Sensagro staff: user directory and roles, sensor lifecycle (register, assign, suspend, etc.), and audit log. UI copy is Spanish.
 
-**Stack:** React 19, Vite 8, Tailwind CSS 4, Firebase Authentication (email/password; admin/support roles enforced via backend).
+**Stack:** React 19, Vite 8, Tailwind CSS 4, Firebase Authentication (email/password; admin roles enforced via backend).
 
 ## Prerequisites
 
@@ -42,7 +42,7 @@ VITE_FIREBASE_PROJECT_ID=your-project-id
 npm run dev
 ```
 
-Sign-in only succeeds for users whose Firebase account is linked in the backend and whose role is `ADMIN` or `SUPPORT` (see backend admin module).
+Sign-in only succeeds for users whose Firebase account is linked in the backend and whose role is `ADMIN` (see backend admin module).
 
 ## Scripts
 

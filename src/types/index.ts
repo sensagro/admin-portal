@@ -1,4 +1,4 @@
-export type UserRole = 'FARMER' | 'ADMIN' | 'SUPPORT'
+export type UserRole = 'FARMER' | 'ADMIN'
 
 export type SensorStatus =
   | 'UNASSIGNED'
@@ -6,7 +6,7 @@ export type SensorStatus =
   | 'SUSPENDED'
   | 'DECOMMISSIONED'
 
-export type SensorType = 'WATER_SENSOR'
+export type SensorType = 'WATER_SENSOR' | 'TEST_SENSOR'
 
 /** Derived from lastReadingAt vs silent threshold (aligned with backend). */
 export type SensorSignalStatus = 'FRESH' | 'NEVER_REPORTED' | 'SILENT'

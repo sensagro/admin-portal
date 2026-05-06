@@ -16,7 +16,7 @@ import { statusBadge } from '@/components/sensors/sensorColumns'
 import { useFlash } from '@/hooks/useFlash'
 import { SuspendUserModal } from '@/components/users/SuspendUserModal'
 
-const ALL_ROLES: UserRole[] = ['FARMER', 'ADMIN', 'SUPPORT']
+const ALL_ROLES: UserRole[] = ['FARMER', 'ADMIN']
 
 function firstAlternativeRole(current: UserRole): UserRole {
   return ALL_ROLES.find((r) => r !== current) ?? 'FARMER'

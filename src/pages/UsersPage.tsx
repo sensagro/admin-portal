@@ -1,7 +1,8 @@
 import { DataTable } from '@/components/ui/DataTable'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { PageSizeSelect } from '@/components/ui/PageSizeSelect'
-import { ChangeUserRoleModal } from '@/components/users/ChangeUserRoleModal'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { ROLE_OPTIONS } from '@/components/users/userColumns'
 import { useUsers } from '@/hooks/useUsers'
 
 export function UsersPage() {
@@ -19,12 +20,14 @@ export function UsersPage() {
     columns,
     roleTarget,
     pendingRole,
-    setPendingRole,
-    closeRoleModal,
+    cancelRoleChange,
     roleBusy,
     roleError,
     saveRole,
   } = useUsers()
+
+  const fromLabel = ROLE_OPTIONS.find((o) => o.value === roleTarget?.role)?.label
+  const toLabel = ROLE_OPTIONS.find((o) => o.value === pendingRole)?.label
 
   return (
     <>
@@ -84,14 +87,25 @@ export function UsersPage() {
         )}
       </>
 
-      <ChangeUserRoleModal
-        user={roleTarget}
-        selectedRole={pendingRole}
-        onSelectedRoleChange={setPendingRole}
-        onClose={closeRoleModal}
-        onSave={() => void saveRole()}
-        busy={roleBusy}
+      <ConfirmDialog
+        open={roleTarget !== null}
+        title="Confirmar cambio de rol"
+        entityLabel={roleTarget?.email ?? ''}
+        body={
+          <>
+            <p>
+              El rol pasará de <strong>{fromLabel}</strong> a <strong>{toLabel}</strong>.
+            </p>
+            <p>Se actualizan la base de datos y las reclamaciones de Firebase para este usuario.</p>
+          </>
+        }
+        reversibility="reversible"
+        confirmLabel="Confirmar"
+        onConfirm={() => void saveRole()}
+        onCancel={cancelRoleChange}
+        loading={roleBusy}
         error={roleError}
+        confirmTone="default"
       />
     </>
   )

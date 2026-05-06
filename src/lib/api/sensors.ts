@@ -50,9 +50,15 @@ export interface BulkRegisterSensorsResult {
   sensors: AdminSensorApiRow[]
 }
 
+export interface SensorRegistrationItem {
+  terminalId: string
+  name: string
+  type: string
+}
+
 export async function bulkRegisterSensors(
   getIdToken: () => Promise<string | null>,
-  payload: { terminalIds: string[]; type?: string },
+  payload: { sensors: SensorRegistrationItem[] },
 ): Promise<BulkRegisterSensorsResult> {
   return apiFetch<BulkRegisterSensorsResult>('/admin/sensors/bulk-register', getIdToken, {
     method: 'POST',

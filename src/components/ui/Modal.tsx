@@ -6,9 +6,15 @@ interface ModalProps {
   title: string
   onClose: () => void
   children: ReactNode
+  size?: 'md' | 'lg'
 }
 
-export function Modal({ open, title, onClose, children }: ModalProps) {
+const sizeClass: Record<NonNullable<ModalProps['size']>, string> = {
+  md: 'max-w-lg',
+  lg: 'max-w-2xl',
+}
+
+export function Modal({ open, title, onClose, children, size = 'md' }: ModalProps) {
   if (!open) return null
 
   return (
@@ -20,7 +26,7 @@ export function Modal({ open, title, onClose, children }: ModalProps) {
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg dark:border-slate-600 dark:bg-slate-900"
+        className={`max-h-[90vh] w-full ${sizeClass[size]} overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg dark:border-slate-600 dark:bg-slate-900`}
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-slate-700">

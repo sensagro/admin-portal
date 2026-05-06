@@ -8,11 +8,6 @@ import { buildUserColumns } from '@/components/users/userColumns'
 import { useAdminData } from './useAdminData'
 import { useFlash } from './useFlash'
 
-const ALL_ROLES: UserRole[] = ['FARMER', 'ADMIN', 'SUPPORT']
-
-function firstAlternativeRole(current: UserRole): UserRole {
-  return ALL_ROLES.find((r) => r !== current) ?? 'FARMER'
-}
 
 export function useUsers() {
   const { me, getIdToken, signOut } = useAuth()
@@ -42,13 +37,14 @@ export function useUsers() {
   const [roleBusy, setRoleBusy] = useState(false)
   const [roleError, setRoleError] = useState<string | null>(null)
 
-  const openRoleModal = useCallback((user: User) => {
+  const requestRoleChange = useCallback((user: User, newRole: UserRole) => {
+    if (newRole === user.role) return
     setRoleTarget(user)
-    setPendingRole(firstAlternativeRole(user.role))
+    setPendingRole(newRole)
     setRoleError(null)
   }, [])
 
-  const closeRoleModal = useCallback(() => {
+  const cancelRoleChange = useCallback(() => {
     setRoleTarget(null)
     setRoleError(null)
   }, [])
@@ -72,7 +68,7 @@ export function useUsers() {
       await patchUserRole(getIdToken, roleTarget.id, pendingRole)
       await reload()
       showFlash('success', `Rol actualizado: ${roleTarget.email}`)
-      closeRoleModal()
+      cancelRoleChange()
     } catch (e) {
       if (await handleAuthError(e)) return
       const msg = e instanceof Error ? e.message : 'No se pudo actualizar el rol'
@@ -80,16 +76,16 @@ export function useUsers() {
     } finally {
       setRoleBusy(false)
     }
-  }, [roleTarget, pendingRole, getIdToken, reload, showFlash, closeRoleModal, handleAuthError])
+  }, [roleTarget, pendingRole, getIdToken, reload, showFlash, cancelRoleChange, handleAuthError])
 
   const columns = useMemo(
     () =>
       buildUserColumns({
         canChangeRole,
         currentUserId: me?.id,
-        onChangeRole: openRoleModal,
+        onChangeRole: requestRoleChange,
       }),
-    [canChangeRole, me?.id, openRoleModal],
+    [canChangeRole, me?.id, requestRoleChange],
   )
 
   return {
@@ -106,8 +102,7 @@ export function useUsers() {
     columns,
     roleTarget,
     pendingRole,
-    setPendingRole,
-    closeRoleModal,
+    cancelRoleChange,
     roleBusy,
     roleError,
     saveRole,

@@ -39,8 +39,6 @@ export function SensorsPage() {
     registerModalKey,
     openRegister,
     closeRegister,
-    registerText,
-    setRegisterText,
     registerBusy,
     registerErr,
     handleBulkRegister,
@@ -193,12 +191,10 @@ export function SensorsPage() {
         key={registerModalKey}
         open={registerOpen}
         onClose={closeRegister}
-        text={registerText}
-        onTextChange={setRegisterText}
         existingTerminalIds={existingTerminalIds}
         busy={registerBusy}
         error={registerErr}
-        onSubmit={(ids) => void handleBulkRegister(ids)}
+        onSubmit={(sensors) => void handleBulkRegister(sensors)}
       />
 
       <ManageSensorModal

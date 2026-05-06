@@ -2,18 +2,22 @@ import { Link } from 'react-router-dom'
 import type { Column } from '@/components/ui/DataTable'
 import type { User, UserRole } from '@/types'
 import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
+import { Select } from '@/components/ui/Select'
 
 export const roleBadge: Record<UserRole, { label: string; variant: 'green' | 'blue' | 'gray' }> = {
   ADMIN: { label: 'Admin', variant: 'green' },
   FARMER: { label: 'Farmer', variant: 'blue' },
-  SUPPORT: { label: 'Support', variant: 'gray' },
 }
+
+export const ROLE_OPTIONS = [
+  { value: 'FARMER' as UserRole, label: 'Agricultor' },
+  { value: 'ADMIN' as UserRole, label: 'Administrador' },
+]
 
 interface BuildUserColumnsOptions {
   canChangeRole: boolean
   currentUserId: string | undefined
-  onChangeRole: (user: User) => void
+  onChangeRole: (user: User, newRole: UserRole) => void
 }
 
 export function buildUserColumns({
@@ -21,7 +25,7 @@ export function buildUserColumns({
   currentUserId,
   onChangeRole,
 }: BuildUserColumnsOptions): Column<User>[] {
-  const columns: Column<User>[] = [
+  return [
     {
       key: 'email',
       header: 'Email',
@@ -41,8 +45,24 @@ export function buildUserColumns({
       key: 'role',
       header: 'Rol',
       render: (user) => {
-        const badge = roleBadge[user.role]
-        return <Badge label={badge.label} variant={badge.variant} />
+        if (!canChangeRole) {
+          const badge = roleBadge[user.role]
+          return <Badge label={badge.label} variant={badge.variant} />
+        }
+        const isSelf = user.id === currentUserId
+        return (
+          <div
+            className="w-36"
+            title={isSelf ? 'No puedes cambiar tu propio rol' : undefined}
+          >
+            <Select
+              value={user.role}
+              onChange={(newRole) => onChangeRole(user, newRole as UserRole)}
+              options={ROLE_OPTIONS}
+              disabled={isSelf}
+            />
+          </div>
+        )
       },
     },
     {
@@ -56,31 +76,4 @@ export function buildUserColumns({
       render: (user) => new Date(user.updatedAt).toLocaleDateString('es-CR'),
     },
   ]
-
-  if (canChangeRole) {
-    columns.push({
-      key: 'actions',
-      header: 'Acciones',
-      render: (user) => {
-        const isSelf = user.id === currentUserId
-        return (
-          <span
-            className="inline-block"
-            title={isSelf ? 'No puedes cambiar tu propio rol' : undefined}
-          >
-            <Button
-              variant="secondary"
-              className="py-1.5"
-              disabled={isSelf}
-              onClick={() => onChangeRole(user)}
-            >
-              Cambiar rol
-            </Button>
-          </span>
-        )
-      },
-    })
-  }
-
-  return columns
 }

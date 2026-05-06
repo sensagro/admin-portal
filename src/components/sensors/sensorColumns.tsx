@@ -16,6 +16,7 @@ export const statusBadge: Record<
 
 export const typeLabels: Record<SensorType, string> = {
   WATER_SENSOR: 'Sensor de agua',
+  TEST_SENSOR: 'Sensor de prueba',
 }
 
 export function formatBattery(mv: number | null): string {
