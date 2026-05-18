@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/Button'
 import { ChangeUserRoleModal } from '@/components/users/ChangeUserRoleModal'
 import { roleBadge } from '@/components/users/userColumns'
 import { statusBadge } from '@/components/sensors/sensorColumns'
+import { FlashOverlay } from '@/components/ui/FlashOverlay'
 import { useFlash } from '@/hooks/useFlash'
 import { SuspendUserModal } from '@/components/users/SuspendUserModal'
 
@@ -27,7 +28,7 @@ export function UserDetailPage() {
   const { me, getIdToken, signOut } = useAuth()
   const canChangeRole = me?.role === 'ADMIN'
   const canSuspendUser = me?.role === 'ADMIN'
-  const { banner, showFlash } = useFlash()
+  const { banner, showFlash, dismissFlash } = useFlash()
 
   const [user, setUser] = useState<UserDetail | null>(null)
   const [loading, setLoading] = useState(true)
@@ -178,6 +179,8 @@ export function UserDetailPage() {
 
   return (
     <>
+      <FlashOverlay banner={banner} onDismiss={dismissFlash} />
+
       <div className="mb-6">
         <Link
           to="/users"
@@ -186,18 +189,6 @@ export function UserDetailPage() {
           ← Usuarios
         </Link>
       </div>
-
-      {banner && (
-        <div
-          className={`mb-4 rounded-lg px-4 py-2 text-sm ${
-            banner.type === 'success'
-              ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200'
-              : 'bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-300'
-          }`}
-        >
-          {banner.text}
-        </div>
-      )}
 
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">

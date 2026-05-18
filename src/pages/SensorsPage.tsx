@@ -9,6 +9,7 @@ import { ManageSensorModal } from '@/components/sensors/ManageSensorModal'
 import { SensorConfirmModal } from '@/components/sensors/SensorConfirmModal'
 import { buildSensorColumns } from '@/components/sensors/sensorColumns'
 import { FleetSignalCard } from '@/components/sensors/FleetSignalCard'
+import { FlashOverlay } from '@/components/ui/FlashOverlay'
 import { useSensors } from '@/hooks/useSensors'
 import type { SensorSignalStatus, SensorStatus } from '@/types'
 
@@ -32,6 +33,7 @@ export function SensorsPage() {
     setPageSize,
     total,
     banner,
+    dismissFlash,
     users,
     userFilter,
     setUserFilter,
@@ -90,6 +92,8 @@ export function SensorsPage() {
 
   return (
     <>
+      <FlashOverlay banner={banner} onDismiss={dismissFlash} />
+
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <PageHeader
           title="Sensores"
@@ -111,18 +115,6 @@ export function SensorsPage() {
           )}
         </div>
       </div>
-
-      {banner && (
-        <div
-          className={`mb-4 rounded-lg px-4 py-2 text-sm ${
-            banner.type === 'success'
-              ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200'
-              : 'bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-300'
-          }`}
-        >
-          {banner.text}
-        </div>
-      )}
 
       {error && (
         <div className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600 dark:bg-red-950/50 dark:text-red-300">

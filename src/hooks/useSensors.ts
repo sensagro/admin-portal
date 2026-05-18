@@ -21,7 +21,7 @@ import { useAdminTablePageSize } from '@/contexts/AdminTablePageSizeContext'
 export function useSensors() {
   const { me, getIdToken, signOut } = useAuth()
   const canMutate = me?.role === 'ADMIN'
-  const { banner, showFlash } = useFlash()
+  const { banner, showFlash, dismissFlash } = useFlash()
   const { pageSize, setPageSize } = useAdminTablePageSize('sensors')
 
   const [rows, setRows] = useState<Sensor[]>([])
@@ -301,6 +301,7 @@ export function useSensors() {
     setPageSize,
     total,
     banner,
+    dismissFlash,
     users: filteredUsers,
     userFilter,
     setUserFilter,

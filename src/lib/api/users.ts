@@ -15,6 +15,35 @@ export async function fetchMe(idToken: string): Promise<MeUser> {
   return apiFetchWithToken<MeUser>('/users/me', idToken)
 }
 
+export type CreateUserPayload = {
+  email: string
+  password?: string
+  name?: string
+  role: UserRole
+}
+
+export interface CreateAdminUserResponse {
+  id: string
+  email: string
+  role: UserRole
+  name: string | null
+  firebaseUid: string
+  createdAt: string
+  updatedAt: string
+  suspendedAt?: string | null
+  generatedPassword?: string
+}
+
+export async function createAdminUser(
+  getIdToken: () => Promise<string | null>,
+  payload: CreateUserPayload,
+): Promise<CreateAdminUserResponse> {
+  return apiFetch<CreateAdminUserResponse>('/admin/users', getIdToken, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
 export interface AdminUserRow {
   id: string
   email: string

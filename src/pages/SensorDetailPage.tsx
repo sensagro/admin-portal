@@ -22,13 +22,14 @@ import { Button } from '@/components/ui/Button'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { DataTable } from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
+import { FlashOverlay } from '@/components/ui/FlashOverlay'
 import { useFlash } from '@/hooks/useFlash'
 
 export function SensorDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { me, getIdToken, signOut } = useAuth()
   const canMutate = me?.role === 'ADMIN'
-  const { banner, showFlash } = useFlash()
+  const { banner, showFlash, dismissFlash } = useFlash()
 
   const [detail, setDetail] = useState<SensorDetail | null>(null)
   const [loading, setLoading] = useState(true)
@@ -246,6 +247,8 @@ export function SensorDetailPage() {
 
   return (
     <>
+      <FlashOverlay banner={banner} onDismiss={dismissFlash} />
+
       <div className="mb-6 flex items-start justify-between gap-4">
         <Link
           to="/sensors"
@@ -259,18 +262,6 @@ export function SensorDetailPage() {
           </Button>
         )}
       </div>
-
-      {banner && (
-        <div
-          className={`mb-4 rounded-lg px-4 py-2 text-sm ${
-            banner.type === 'success'
-              ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200'
-              : 'bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-300'
-          }`}
-        >
-          {banner.text}
-        </div>
-      )}
 
       <div className="mb-6">
         <PageHeader title={detail.name} />

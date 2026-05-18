@@ -12,7 +12,7 @@ import { useFlash } from './useFlash'
 export function useUsers() {
   const { me, getIdToken, signOut } = useAuth()
   const canChangeRole = me?.role === 'ADMIN'
-  const { banner, showFlash } = useFlash()
+  const { banner, showFlash, dismissFlash } = useFlash()
 
   const {
     data: rows,
@@ -76,7 +76,15 @@ export function useUsers() {
     } finally {
       setRoleBusy(false)
     }
-  }, [roleTarget, pendingRole, getIdToken, reload, showFlash, cancelRoleChange, handleAuthError])
+  }, [
+    roleTarget,
+    pendingRole,
+    getIdToken,
+    reload,
+    showFlash,
+    cancelRoleChange,
+    handleAuthError,
+  ])
 
   const columns = useMemo(
     () =>
@@ -89,6 +97,7 @@ export function useUsers() {
   )
 
   return {
+    getIdToken,
     rows,
     loading,
     error,
@@ -99,6 +108,7 @@ export function useUsers() {
     setPageSize,
     total,
     banner,
+    dismissFlash,
     columns,
     roleTarget,
     pendingRole,
@@ -106,6 +116,9 @@ export function useUsers() {
     roleBusy,
     roleError,
     saveRole,
+    reload,
+    showFlash,
+    handleAuthError,
   }
 }
 

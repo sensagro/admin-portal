@@ -1,12 +1,17 @@
+import { useState } from 'react'
 import { DataTable } from '@/components/ui/DataTable'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { PageSizeSelect } from '@/components/ui/PageSizeSelect'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { Button } from '@/components/ui/Button'
 import { ROLE_OPTIONS } from '@/components/users/userColumns'
+import { CreateUserModal } from '@/components/users/CreateUserModal'
+import { FlashOverlay } from '@/components/ui/FlashOverlay'
 import { useUsers } from '@/hooks/useUsers'
 
 export function UsersPage() {
   const {
+    getIdToken,
     rows,
     loading,
     error,
@@ -17,6 +22,7 @@ export function UsersPage() {
     setPageSize,
     total,
     banner,
+    dismissFlash,
     columns,
     roleTarget,
     pendingRole,
@@ -24,20 +30,32 @@ export function UsersPage() {
     roleBusy,
     roleError,
     saveRole,
+    reload,
+    showFlash,
+    handleAuthError,
   } = useUsers()
+
+  const [createUserOpen, setCreateUserOpen] = useState(false)
 
   const fromLabel = ROLE_OPTIONS.find((o) => o.value === roleTarget?.role)?.label
   const toLabel = ROLE_OPTIONS.find((o) => o.value === pendingRole)?.label
 
   return (
     <>
+      <FlashOverlay banner={banner} onDismiss={dismissFlash} />
+
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <PageHeader
-          title="Usuarios registrados"
-          count={loading ? undefined : rows.length}
-          total={loading ? undefined : total ?? undefined}
-          className="min-w-0"
-        />
+        <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+          <PageHeader
+            title="Usuarios registrados"
+            count={loading ? undefined : rows.length}
+            total={loading ? undefined : total ?? undefined}
+            className="mb-0 min-w-0"
+          />
+          <Button variant="primary" onClick={() => setCreateUserOpen(true)} disabled={loading}>
+            Crear usuario
+          </Button>
+        </div>
         <PageSizeSelect
           id="users-page-size"
           value={pageSize}
@@ -45,18 +63,6 @@ export function UsersPage() {
           disabled={loading || loadingMore}
         />
       </div>
-
-      {banner && (
-        <div
-          className={`mb-4 rounded-lg px-4 py-2 text-sm ${
-            banner.type === 'success'
-              ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200'
-              : 'bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-300'
-          }`}
-        >
-          {banner.text}
-        </div>
-      )}
 
       {error && (
         <div className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600 dark:bg-red-950/50 dark:text-red-300">
@@ -106,6 +112,15 @@ export function UsersPage() {
         loading={roleBusy}
         error={roleError}
         confirmTone="default"
+      />
+
+      <CreateUserModal
+        open={createUserOpen}
+        onClose={() => setCreateUserOpen(false)}
+        getIdToken={getIdToken}
+        onAuthError={handleAuthError}
+        onCreated={reload}
+        showFlash={showFlash}
       />
     </>
   )

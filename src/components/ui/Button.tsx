@@ -17,12 +17,20 @@ interface ButtonProps {
   onClick?: () => void
   children: ReactNode
   className?: string
+  type?: 'button' | 'submit'
 }
 
-export function Button({ variant = 'secondary', disabled, onClick, children, className }: ButtonProps) {
+export function Button({
+  variant = 'secondary',
+  disabled,
+  onClick,
+  children,
+  className,
+  type = 'button',
+}: ButtonProps) {
   const classes = className ? `${variantClasses[variant]} ${className}` : variantClasses[variant]
   return (
-    <button type="button" className={classes} onClick={onClick} disabled={disabled}>
+    <button type={type} className={classes} onClick={onClick} disabled={disabled}>
       {children}
     </button>
   )
