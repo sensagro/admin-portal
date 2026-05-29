@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { ApiError } from '@/lib/api'
 import { fetchAdminSensors, type AdminSensorApiRow } from '@/lib/api/sensors'
 import { mapSensorRow } from '@/lib/mappers/sensor'
+import { DashboardListRow } from '@/components/ui/DashboardListRow'
 import type { Sensor, SensorSignalStatus, SensorStatus } from '@/types'
 
 const FLEET_PREVIEW_LIMIT = 50
@@ -154,21 +155,15 @@ export function FleetSignalCard({
           <ul className="divide-y divide-gray-100 rounded-lg border border-gray-100 dark:divide-slate-800 dark:border-slate-700">
             {silent.items.map((row) => (
               <li key={row.id}>
-                <button
-                  type="button"
+                <DashboardListRow
                   onClick={() => onOpenSensor(mapSensorRow(row))}
-                  className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left text-sm hover:bg-gray-50 dark:hover:bg-slate-800/80"
-                >
-                  <span className="min-w-0 truncate font-mono text-gray-900 dark:text-gray-100">
-                    {row.terminalId}
-                  </span>
-                  <span className="shrink-0 text-xs text-gray-500 dark:text-gray-400">
-                    {row.owner?.email ?? '—'}
-                  </span>
-                  <span className="shrink-0 text-xs text-amber-700 dark:text-amber-300">
-                    {row.lastReadingAt ? formatLastReadingAgo(row.lastReadingAt) : '—'}
-                  </span>
-                </button>
+                  primary={row.terminalId}
+                  secondary={row.owner?.email ?? '—'}
+                  tertiary={
+                    row.lastReadingAt ? formatLastReadingAgo(row.lastReadingAt) : '—'
+                  }
+                  tertiaryClassName="text-amber-700 dark:text-amber-300"
+                />
               </li>
             ))}
           </ul>
@@ -196,18 +191,11 @@ export function FleetSignalCard({
           <ul className="divide-y divide-gray-100 rounded-lg border border-gray-100 dark:divide-slate-800 dark:border-slate-700">
             {neverReported.items.map((row) => (
               <li key={row.id}>
-                <button
-                  type="button"
+                <DashboardListRow
                   onClick={() => onOpenSensor(mapSensorRow(row))}
-                  className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left text-sm hover:bg-gray-50 dark:hover:bg-slate-800/80"
-                >
-                  <span className="min-w-0 truncate font-mono text-gray-900 dark:text-gray-100">
-                    {row.terminalId}
-                  </span>
-                  <span className="shrink-0 text-xs text-gray-500 dark:text-gray-400">
-                    {row.owner?.email ?? '—'}
-                  </span>
-                </button>
+                  primary={row.terminalId}
+                  secondary={row.owner?.email ?? '—'}
+                />
               </li>
             ))}
           </ul>
@@ -235,16 +223,11 @@ export function FleetSignalCard({
           <ul className="divide-y divide-gray-100 rounded-lg border border-gray-100 dark:divide-slate-800 dark:border-slate-700">
             {unassigned.items.map((row) => (
               <li key={row.id}>
-                <button
-                  type="button"
+                <DashboardListRow
                   onClick={() => onOpenSensor(mapSensorRow(row))}
-                  className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left text-sm hover:bg-gray-50 dark:hover:bg-slate-800/80"
-                >
-                  <span className="min-w-0 truncate font-mono text-gray-900 dark:text-gray-100">
-                    {row.terminalId}
-                  </span>
-                  <span className="shrink-0 text-xs text-gray-500 dark:text-gray-400">—</span>
-                </button>
+                  primary={row.terminalId}
+                  secondary="—"
+                />
               </li>
             ))}
           </ul>

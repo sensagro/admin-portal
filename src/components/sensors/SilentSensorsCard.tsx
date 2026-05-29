@@ -7,7 +7,7 @@ import { DashboardListRow } from '@/components/ui/DashboardListRow'
 
 const LIMIT = 10
 
-function formatUnassignedAgo(iso: string): string {
+function formatLastReadingAgo(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime()
   const minutes = Math.round(diffMs / (60 * 1000))
   const rtf = new Intl.RelativeTimeFormat('es-AR', { numeric: 'auto' })
@@ -22,7 +22,15 @@ function formatUnassignedAgo(iso: string): string {
   return rtf.format(-days, 'day')
 }
 
-export function RecentlyUnassignedCard() {
+function sortSilentRows(rows: AdminSensorApiRow[]): AdminSensorApiRow[] {
+  return [...rows].sort((a, b) => {
+    const ta = a.lastReadingAt ? new Date(a.lastReadingAt).getTime() : 0
+    const tb = b.lastReadingAt ? new Date(b.lastReadingAt).getTime() : 0
+    return ta - tb
+  })
+}
+
+export function SilentSensorsCard() {
   const { getIdToken, signOut } = useAuth()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
@@ -34,18 +42,15 @@ export function RecentlyUnassignedCard() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetchAdminSensors(getIdToken, LIMIT, undefined, undefined, {
-        status: 'UNASSIGNED',
-        orderBy: 'unassignedAt:desc',
-      })
-      setRows(res.items)
+      const res = await fetchAdminSensors(getIdToken, LIMIT, undefined, 'SILENT')
+      setRows(sortSilentRows(res.items))
       setTotal(res.total)
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) {
         await signOut()
         return
       }
-      setError(e instanceof Error ? e.message : 'Error al cargar sensores sin asignar')
+      setError(e instanceof Error ? e.message : 'Error al cargar sensores en silencio')
     } finally {
       setLoading(false)
     }
@@ -78,13 +83,17 @@ export function RecentlyUnassignedCard() {
   return (
     <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-          Desasignados recientemente{' '}
+        <button
+          type="button"
+          onClick={() => navigate('/sensors?signalStatus=SILENT')}
+          className="text-left text-sm font-semibold text-gray-900 hover:text-blue-700 dark:text-gray-100 dark:hover:text-blue-300"
+        >
+          Sensores en silencio{' '}
           <span className="font-normal text-gray-500 dark:text-gray-400">({total})</span>
-        </h2>
+        </button>
         {total > 0 && (
           <Link
-            to="/sensors?status=UNASSIGNED"
+            to="/sensors?signalStatus=SILENT"
             className="text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
           >
             Ver todos
@@ -93,7 +102,7 @@ export function RecentlyUnassignedCard() {
       </div>
 
       {total === 0 ? (
-        <p className="text-sm text-gray-600 dark:text-gray-400">No hay sensores sin asignar.</p>
+        <p className="text-sm text-gray-600 dark:text-gray-400">Toda la flota transmitiendo.</p>
       ) : (
         <ul className="divide-y divide-gray-100 rounded-lg border border-gray-100 dark:divide-slate-800 dark:border-slate-700">
           {rows.map((row) => (
@@ -101,7 +110,11 @@ export function RecentlyUnassignedCard() {
               <DashboardListRow
                 onClick={() => navigate(`/sensors/${encodeURIComponent(row.id)}`)}
                 primary={row.terminalId}
-                tertiary={row.unassignedAt ? formatUnassignedAgo(row.unassignedAt) : '—'}
+                secondary={row.owner?.email ?? '—'}
+                tertiary={
+                  row.lastReadingAt ? formatLastReadingAgo(row.lastReadingAt) : '—'
+                }
+                tertiaryClassName="text-amber-700 dark:text-amber-300"
               />
             </li>
           ))}
