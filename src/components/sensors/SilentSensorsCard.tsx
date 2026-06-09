@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { ApiError } from '@/lib/api'
 import { fetchAdminSensors, type AdminSensorApiRow } from '@/lib/api/sensors'
+import { CollapsibleCard } from '@/components/ui/CollapsibleCard'
 import { DashboardListRow } from '@/components/ui/DashboardListRow'
 
 const LIMIT = 10
@@ -60,47 +61,17 @@ export function SilentSensorsCard() {
     void load()
   }, [load])
 
-  if (loading) {
-    return (
-      <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-        <div className="mb-3 h-4 w-48 animate-pulse rounded bg-gray-200 dark:bg-slate-700" />
-        <div className="space-y-2">
-          <div className="h-10 animate-pulse rounded-lg bg-gray-100 dark:bg-slate-800" />
-          <div className="h-10 animate-pulse rounded-lg bg-gray-100 dark:bg-slate-800" />
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
-        {error}
-      </div>
-    )
-  }
+  const targetHref = '/sensors?signalStatus=SILENT'
 
   return (
-    <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <button
-          type="button"
-          onClick={() => navigate('/sensors?signalStatus=SILENT')}
-          className="text-left text-sm font-semibold text-gray-900 hover:text-blue-700 dark:text-gray-100 dark:hover:text-blue-300"
-        >
-          Sensores en silencio{' '}
-          <span className="font-normal text-gray-500 dark:text-gray-400">({total})</span>
-        </button>
-        {total > 0 && (
-          <Link
-            to="/sensors?signalStatus=SILENT"
-            className="text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-          >
-            Ver todos
-          </Link>
-        )}
-      </div>
-
+    <CollapsibleCard
+      title="Sensores en silencio"
+      count={total}
+      titleHref={targetHref}
+      viewAllHref={total > 0 ? targetHref : undefined}
+      loading={loading}
+      error={error}
+    >
       {total === 0 ? (
         <p className="text-sm text-gray-600 dark:text-gray-400">Toda la flota transmitiendo.</p>
       ) : (
@@ -111,15 +82,13 @@ export function SilentSensorsCard() {
                 onClick={() => navigate(`/sensors/${encodeURIComponent(row.id)}`)}
                 primary={row.terminalId}
                 secondary={row.owner?.email ?? '—'}
-                tertiary={
-                  row.lastReadingAt ? formatLastReadingAgo(row.lastReadingAt) : '—'
-                }
+                tertiary={row.lastReadingAt ? formatLastReadingAgo(row.lastReadingAt) : '—'}
                 tertiaryClassName="text-amber-700 dark:text-amber-300"
               />
             </li>
           ))}
         </ul>
       )}
-    </div>
+    </CollapsibleCard>
   )
 }

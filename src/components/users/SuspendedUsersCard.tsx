@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { ApiError } from '@/lib/api'
 import { fetchAdminUsers, type AdminUserRow } from '@/lib/api/users'
+import { CollapsibleCard } from '@/components/ui/CollapsibleCard'
 import { DashboardListRow } from '@/components/ui/DashboardListRow'
 
 const PAGE_SIZE = 100
@@ -74,51 +75,17 @@ export function SuspendedUsersCard() {
     void load()
   }, [load])
 
-  if (loading) {
-    return (
-      <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-        <div className="mb-3 h-4 w-48 animate-pulse rounded bg-gray-200 dark:bg-slate-700" />
-        <div className="space-y-2">
-          <div className="h-10 animate-pulse rounded-lg bg-gray-100 dark:bg-slate-800" />
-          <div className="h-10 animate-pulse rounded-lg bg-gray-100 dark:bg-slate-800" />
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
-        {error}
-      </div>
-    )
-  }
-
   return (
-    <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <button
-          type="button"
-          onClick={() => navigate('/users')}
-          className="text-left text-sm font-semibold text-gray-900 hover:text-blue-700 dark:text-gray-100 dark:hover:text-blue-300"
-        >
-          Usuarios suspendidos{' '}
-          <span className="font-normal text-gray-500 dark:text-gray-400">({total})</span>
-        </button>
-        {total > 0 && (
-          <Link
-            to="/users"
-            className="text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-          >
-            Ver todos
-          </Link>
-        )}
-      </div>
-
+    <CollapsibleCard
+      title="Usuarios suspendidos"
+      count={total}
+      titleHref="/users"
+      viewAllHref={total > 0 ? '/users' : undefined}
+      loading={loading}
+      error={error}
+    >
       {total === 0 ? (
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          No hay usuarios suspendidos.
-        </p>
+        <p className="text-sm text-gray-600 dark:text-gray-400">No hay usuarios suspendidos.</p>
       ) : (
         <ul className="divide-y divide-gray-100 rounded-lg border border-gray-100 dark:divide-slate-800 dark:border-slate-700">
           {rows.map((row) => (
@@ -133,6 +100,6 @@ export function SuspendedUsersCard() {
           ))}
         </ul>
       )}
-    </div>
+    </CollapsibleCard>
   )
 }
