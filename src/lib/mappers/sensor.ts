@@ -32,6 +32,8 @@ export function mapSensorDetailToSensor(d: SensorDetail): Sensor {
     lastBatteryVoltage: d.lastBatteryVoltage,
     lastTemperature: d.lastTemperature,
     lastElevation: d.lastElevation,
+    lastLatitude: d.lastLatitude,
+    lastLongitude: d.lastLongitude,
     lastAlertHasWater: d.lastAlertHasWater,
     createdAt: d.createdAt,
     signalStatus: d.signalStatus,

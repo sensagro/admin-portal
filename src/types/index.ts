@@ -33,6 +33,8 @@ export interface Sensor {
   lastBatteryVoltage: number | null
   lastTemperature?: number | null
   lastElevation?: number | null
+  lastLatitude?: number | null
+  lastLongitude?: number | null
   lastAlertHasWater?: boolean | null
   createdAt: string
   signalStatus?: SensorSignalStatus

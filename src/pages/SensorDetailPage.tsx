@@ -14,6 +14,7 @@ import { fetchAdminUsers, type AdminUserRow } from '@/lib/api/users'
 import { mapSensorDetailToSensor } from '@/lib/mappers/sensor'
 import type { Sensor, SensorDetail } from '@/types'
 import { ManageSensorModal } from '@/components/sensors/ManageSensorModal'
+import { SensorLocationPreview } from '@/components/sensors/SensorLocationPreview'
 import { SensorConfirmModal } from '@/components/sensors/SensorConfirmModal'
 import type { ConfirmKind } from '@/components/sensors/SensorConfirmModal'
 import { formatBattery, formatDate, statusBadge, typeLabels } from '@/components/sensors/sensorColumns'
@@ -299,7 +300,8 @@ export function SensorDetailPage() {
 
       <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4 text-sm dark:border-slate-700 dark:bg-slate-900">
         <h3 className="mb-2 font-semibold text-gray-900 dark:text-gray-100">Última lectura (resumen)</h3>
-        <dl className="grid gap-2 sm:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
+          <dl className="grid gap-2 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2">
           <div>
             <dt className="text-gray-500 dark:text-gray-400">Última señal</dt>
             <dd className="text-gray-800 dark:text-gray-200">{formatDate(detail.lastReadingAt)}</dd>
@@ -330,7 +332,9 @@ export function SensorDetailPage() {
                   : 'No'}
             </dd>
           </div>
-        </dl>
+          </dl>
+          <SensorLocationPreview lat={detail.lastLatitude} lng={detail.lastLongitude} />
+        </div>
       </div>
 
       <h2 className="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Últimas lecturas</h2>
