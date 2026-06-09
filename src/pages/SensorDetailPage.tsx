@@ -299,6 +299,41 @@ export function SensorDetailPage() {
       </div>
 
       <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4 text-sm dark:border-slate-700 dark:bg-slate-900">
+        <h3 className="mb-2 font-semibold text-gray-900 dark:text-gray-100">Compartido con</h3>
+        {detail.memberships && detail.memberships.length > 0 ? (
+          <ul className="space-y-1">
+            {detail.memberships.map((m) => (
+              <li key={m.user.id} className="flex items-center gap-2">
+                <Link
+                  to={`/users/${m.user.id}`}
+                  className="text-emerald-800 hover:underline dark:text-emerald-400"
+                >
+                  {m.user.email}
+                </Link>
+                <span className="text-xs text-gray-400 dark:text-gray-500">Solo lectura</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <span className="text-gray-500 dark:text-gray-400">No compartido</span>
+        )}
+        {detail.invitations && detail.invitations.length > 0 ? (
+          <div className="mt-3">
+            <h4 className="mb-1 text-xs font-semibold uppercase text-gray-400 dark:text-gray-500">
+              Invitaciones pendientes
+            </h4>
+            <ul className="space-y-1">
+              {detail.invitations.map((inv) => (
+                <li key={inv.id} className="text-gray-600 dark:text-gray-300">
+                  {inv.email}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4 text-sm dark:border-slate-700 dark:bg-slate-900">
         <h3 className="mb-2 font-semibold text-gray-900 dark:text-gray-100">Última lectura (resumen)</h3>
         <div className="grid gap-4 md:grid-cols-2">
           <dl className="grid gap-2 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2">

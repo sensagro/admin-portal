@@ -153,6 +153,37 @@ export function UserDetailPage() {
     },
   ]
 
+  const sharedSensorColumns: Column<
+    NonNullable<UserDetail['sharedSensors']>[number]
+  >[] = [
+    {
+      key: 'terminalId',
+      header: 'Terminal ID',
+      render: (s) => (
+        <Link
+          to={`/sensors/${s.id}`}
+          className="font-mono text-xs text-emerald-800 hover:underline dark:text-emerald-400"
+        >
+          {s.terminalId}
+        </Link>
+      ),
+    },
+    { key: 'name', header: 'Nombre', render: (s) => s.name },
+    {
+      key: 'ownerEmail',
+      header: 'Propietario',
+      render: (s) => s.ownerEmail ?? '—',
+    },
+    {
+      key: 'status',
+      header: 'Estado',
+      render: (s) => {
+        const badge = statusBadge[s.status]
+        return <Badge label={badge.label} variant={badge.variant} />
+      },
+    },
+  ]
+
   if (loading) {
     return <p className="text-sm text-gray-500 dark:text-gray-400">Cargando usuario…</p>
   }
@@ -245,6 +276,19 @@ export function UserDetailPage() {
       <div className="mb-8 rounded-xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-900">
         <DataTable columns={sensorColumns} rows={user.ownedSensors} keyExtractor={(s) => s.id} />
       </div>
+
+      {user.sharedSensors && user.sharedSensors.length > 0 ? (
+        <>
+          <h2 className="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Sensores compartidos</h2>
+          <div className="mb-8 rounded-xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+            <DataTable
+              columns={sharedSensorColumns}
+              rows={user.sharedSensors}
+              keyExtractor={(s) => s.id}
+            />
+          </div>
+        </>
+      ) : null}
 
       <h2 className="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-100">Tokens de notificación push</h2>
       <p className="mb-3 text-sm text-gray-600 dark:text-gray-400">{user.pushTokens.length} registrado(s)</p>
