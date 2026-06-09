@@ -45,23 +45,23 @@ export function UsersPage() {
       <FlashOverlay banner={banner} onDismiss={dismissFlash} />
 
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-          <PageHeader
-            title="Usuarios registrados"
-            count={loading ? undefined : rows.length}
-            total={loading ? undefined : total ?? undefined}
-            className="mb-0 min-w-0"
+        <PageHeader
+          title="Usuarios registrados"
+          count={loading ? undefined : rows.length}
+          total={loading ? undefined : total ?? undefined}
+          className="min-w-0"
+        />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4">
+          <PageSizeSelect
+            id="users-page-size"
+            value={pageSize}
+            onChange={setPageSize}
+            disabled={loading || loadingMore}
           />
           <Button variant="primary" onClick={() => setCreateUserOpen(true)} disabled={loading}>
             Crear usuario
           </Button>
         </div>
-        <PageSizeSelect
-          id="users-page-size"
-          value={pageSize}
-          onChange={setPageSize}
-          disabled={loading || loadingMore}
-        />
       </div>
 
       {error && (

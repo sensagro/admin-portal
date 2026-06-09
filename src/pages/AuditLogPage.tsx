@@ -13,6 +13,7 @@ import { DataTable } from '@/components/ui/DataTable'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { PageSizeSelect } from '@/components/ui/PageSizeSelect'
 import { Button } from '@/components/ui/Button'
+import { Select } from '@/components/ui/Select'
 import { useAdminData } from '@/hooks/useAdminData'
 import { useAuth } from '@/contexts/AuthContext'
 import { AUDIT_ACTION_OPTIONS } from '@/constants/auditActions'
@@ -275,32 +276,25 @@ export function AuditLogPage() {
           </label>
           <label className="flex flex-col gap-1 text-xs font-medium text-gray-600 dark:text-gray-400">
             Entidad
-            <select
+            <Select
               value={entityType}
-              onChange={(e) => setEntityType(e.target.value)}
-              className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100"
-            >
-              {ENTITY_TYPE_OPTIONS.map((v) => (
-                <option key={v || 'all'} value={v}>
-                  {v === '' ? 'Todas' : v}
-                </option>
-              ))}
-            </select>
+              onChange={setEntityType}
+              options={ENTITY_TYPE_OPTIONS.map((v) => ({
+                value: v,
+                label: v === '' ? 'Todas' : v,
+              }))}
+            />
           </label>
           <label className="flex flex-col gap-1 text-xs font-medium text-gray-600 dark:text-gray-400">
             Acción
-            <select
+            <Select
               value={action}
-              onChange={(e) => setAction(e.target.value)}
-              className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100"
-            >
-              <option value="">Todas</option>
-              {AUDIT_ACTION_OPTIONS.map((a) => (
-                <option key={a} value={a}>
-                  {a}
-                </option>
-              ))}
-            </select>
+              onChange={setAction}
+              options={[
+                { value: '', label: 'Todas' },
+                ...AUDIT_ACTION_OPTIONS.map((a) => ({ value: a, label: a })),
+              ]}
+            />
           </label>
           <label className="flex flex-col gap-1 text-xs font-medium text-gray-600 dark:text-gray-400 sm:col-span-2 xl:col-span-2">
             Correo del actor

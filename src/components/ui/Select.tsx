@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Check, ChevronDown } from 'lucide-react'
 
 export interface SelectOption<T extends string = string> {
@@ -33,17 +33,31 @@ export function Select<T extends string = string>({
   const openDropdown = useCallback(() => {
     if (!triggerRef.current) return
     const rect = triggerRef.current.getBoundingClientRect()
+    const margin = 8
     setDropdownStyle({
       position: 'fixed',
       top: rect.bottom + 4,
       left: rect.left,
-      width: Math.max(rect.width, 160),
+      minWidth: Math.max(rect.width, 160),
+      maxWidth: window.innerWidth - margin * 2,
       zIndex: 9999,
     })
     const idx = options.findIndex((o) => o.value === value)
     setFocusedIdx(idx >= 0 ? idx : 0)
     setOpen(true)
   }, [options, value])
+
+  // After the list renders we know its intrinsic width; shift left so it stays in the viewport.
+  useLayoutEffect(() => {
+    if (!open || !listRef.current) return
+    const margin = 8
+    const listRect = listRef.current.getBoundingClientRect()
+    const overflow = listRect.right - (window.innerWidth - margin)
+    if (overflow > 0) {
+      const newLeft = Math.max(margin, listRect.left - overflow)
+      setDropdownStyle((s) => ({ ...s, left: newLeft }))
+    }
+  }, [open])
 
   // Scroll focused option into view
   useEffect(() => {
@@ -65,6 +79,20 @@ export function Select<T extends string = string>({
     }
     document.addEventListener('mousedown', handle, true)
     return () => document.removeEventListener('mousedown', handle, true)
+  }, [open])
+
+  // Close on scroll/resize: dropdown is position:fixed so it would detach from the trigger.
+  useEffect(() => {
+    if (!open) return
+    function close() {
+      setOpen(false)
+    }
+    window.addEventListener('scroll', close, true)
+    window.addEventListener('resize', close)
+    return () => {
+      window.removeEventListener('scroll', close, true)
+      window.removeEventListener('resize', close)
+    }
   }, [open])
 
   function handleKeyDown(e: React.KeyboardEvent) {

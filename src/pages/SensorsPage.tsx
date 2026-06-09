@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { PageSizeSelect } from '@/components/ui/PageSizeSelect'
 import { Button } from '@/components/ui/Button'
+import { Select } from '@/components/ui/Select'
 import { DataTable } from '@/components/ui/DataTable'
 import { RegisterSensorsModal } from '@/components/sensors/RegisterSensorsModal'
 import { ManageSensorModal } from '@/components/sensors/ManageSensorModal'
@@ -220,29 +221,30 @@ export function SensorsPage() {
           </label>
           <label className="flex flex-col gap-1 text-xs font-medium text-gray-600 dark:text-gray-400">
             Tipo
-            <select
+            <Select
               value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value as SensorType | '')}
-              className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100"
-            >
-              <option value="">Todos</option>
-              {(Object.entries(typeLabels) as [SensorType, string][]).map(([k, v]) => (
-                <option key={k} value={k}>{v}</option>
-              ))}
-            </select>
+              onChange={(v) => setTypeFilter(v as SensorType | '')}
+              options={[
+                { value: '', label: 'Todos' },
+                ...(Object.entries(typeLabels) as [SensorType, string][]).map(([k, v]) => ({
+                  value: k,
+                  label: v,
+                })),
+              ]}
+            />
           </label>
           <label className="flex flex-col gap-1 text-xs font-medium text-gray-600 dark:text-gray-400">
             Estado
-            <select
+            <Select
               value={statusFilterLocal}
-              onChange={(e) => setStatusFilterLocal(e.target.value as SensorStatus | '')}
-              className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100"
-            >
-              <option value="">Todos</option>
-              {(Object.entries(statusBadge) as [SensorStatus, { label: string }][]).map(([k, v]) => (
-                <option key={k} value={k}>{v.label}</option>
-              ))}
-            </select>
+              onChange={(v) => setStatusFilterLocal(v as SensorStatus | '')}
+              options={[
+                { value: '', label: 'Todos' },
+                ...(Object.entries(statusBadge) as [SensorStatus, { label: string }][]).map(
+                  ([k, v]) => ({ value: k, label: v.label }),
+                ),
+              ]}
+            />
           </label>
         </div>
         {hasLocalFilters && (

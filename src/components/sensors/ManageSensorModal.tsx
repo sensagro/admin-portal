@@ -5,6 +5,7 @@ import type { ConfirmKind } from './SensorConfirmModal'
 import { Modal } from '@/components/ui/Modal'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
+import { Select } from '@/components/ui/Select'
 import { statusBadge } from './sensorColumns'
 
 const inputClass =
@@ -43,19 +44,18 @@ function UserPicker({ users, selectedId, filter, onFilterChange, onSelectChange,
         onChange={(e) => onFilterChange(e.target.value)}
         disabled={disabled}
       />
-      <select
-        className={`mb-2 text-gray-900 ${inputClass}`}
-        value={selectedId}
-        onChange={(e) => onSelectChange(e.target.value)}
-        disabled={disabled}
-      >
-        <option value="">{placeholder}</option>
-        {users.map((u) => (
-          <option key={u.id} value={u.id}>
-            {u.email} ({u.role})
-          </option>
-        ))}
-      </select>
+      <div className="mb-2">
+        <Select
+          value={selectedId}
+          onChange={onSelectChange}
+          disabled={disabled}
+          placeholder={placeholder}
+          options={[
+            { value: '', label: placeholder },
+            ...users.map((u) => ({ value: u.id, label: `${u.email} (${u.role})` })),
+          ]}
+        />
+      </div>
     </>
   )
 }
