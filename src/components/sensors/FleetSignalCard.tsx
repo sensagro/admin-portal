@@ -52,6 +52,7 @@ export function FleetSignalCard({
   onOpenSensor,
 }: Props) {
   const { getIdToken, signOut } = useAuth()
+  const [collapsed, setCollapsed] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [silent, setSilent] = useState<{ items: AdminSensorApiRow[]; total: number }>({
@@ -110,10 +111,12 @@ export function FleetSignalCard({
     return (
       <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
         <div className="mb-3 h-4 w-40 animate-pulse rounded bg-gray-200 dark:bg-slate-700" />
-        <div className="space-y-2">
-          <div className="h-10 animate-pulse rounded-lg bg-gray-100 dark:bg-slate-800" />
-          <div className="h-10 animate-pulse rounded-lg bg-gray-100 dark:bg-slate-800" />
-        </div>
+        {!collapsed && (
+          <div className="space-y-2">
+            <div className="h-10 animate-pulse rounded-lg bg-gray-100 dark:bg-slate-800" />
+            <div className="h-10 animate-pulse rounded-lg bg-gray-100 dark:bg-slate-800" />
+          </div>
+        )}
       </div>
     )
   }
@@ -128,110 +131,122 @@ export function FleetSignalCard({
 
   return (
     <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-      <h2 className="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Estado de flota</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Estado de flota</h2>
+        <button
+          type="button"
+          onClick={() => setCollapsed((c) => !c)}
+          className="rounded p-1 text-xs text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-slate-800 dark:hover:text-gray-200"
+          aria-expanded={!collapsed}
+        >
+          {collapsed ? 'Mostrar' : 'Ocultar'}
+        </button>
+      </div>
 
-      <section className="mb-5">
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-amber-500" aria-hidden />
-            <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-              Sin señal{' '}
-              <span className="font-normal text-gray-500 dark:text-gray-400">({silent.total})</span>
-            </span>
-          </div>
-          {silent.total > 0 && (
-            <button
-              type="button"
-              onClick={() => onApplySignalTableFilter('SILENT')}
-              className="text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-            >
-              Ver todos
-            </button>
+      {!collapsed && (
+        <div className="mt-3 flex flex-col gap-5">
+          <section>
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-amber-500" aria-hidden />
+                <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                  Sin señal{' '}
+                  <span className="font-normal text-gray-500 dark:text-gray-400">({silent.total})</span>
+                </span>
+              </div>
+              {silent.total > 0 && (
+                <button
+                  type="button"
+                  onClick={() => onApplySignalTableFilter('SILENT')}
+                  className="text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                >
+                  Ver todos
+                </button>
+              )}
+            </div>
+            {silent.total === 0 ? (
+              <p className="text-sm text-gray-600 dark:text-gray-400">Toda la flota transmitiendo.</p>
+            ) : (
+              <ul className="divide-y divide-gray-100 rounded-lg border border-gray-100 dark:divide-slate-800 dark:border-slate-700">
+                {silent.items.map((row) => (
+                  <li key={row.id}>
+                    <DashboardListRow
+                      onClick={() => onOpenSensor(mapSensorRow(row))}
+                      primary={row.terminalId}
+                      secondary={row.owner?.email ?? '—'}
+                      tertiary={row.lastReadingAt ? formatLastReadingAgo(row.lastReadingAt) : '—'}
+                      tertiaryClassName="text-amber-700 dark:text-amber-300"
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          {neverReported.total > 0 && (
+            <section>
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-gray-400" aria-hidden />
+                  <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                    Esperando primera lectura{' '}
+                    <span className="font-normal text-gray-500 dark:text-gray-400">({neverReported.total})</span>
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onApplySignalTableFilter('NEVER_REPORTED')}
+                  className="text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                >
+                  Ver todos
+                </button>
+              </div>
+              <ul className="divide-y divide-gray-100 rounded-lg border border-gray-100 dark:divide-slate-800 dark:border-slate-700">
+                {neverReported.items.map((row) => (
+                  <li key={row.id}>
+                    <DashboardListRow
+                      onClick={() => onOpenSensor(mapSensorRow(row))}
+                      primary={row.terminalId}
+                      secondary={row.owner?.email ?? '—'}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {unassigned.total > 0 && (
+            <section>
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-slate-400" aria-hidden />
+                  <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                    Sin asignar{' '}
+                    <span className="font-normal text-gray-500 dark:text-gray-400">({unassigned.total})</span>
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onApplyStatusTableFilter('UNASSIGNED')}
+                  className="text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                >
+                  Ver todos
+                </button>
+              </div>
+              <ul className="divide-y divide-gray-100 rounded-lg border border-gray-100 dark:divide-slate-800 dark:border-slate-700">
+                {unassigned.items.map((row) => (
+                  <li key={row.id}>
+                    <DashboardListRow
+                      onClick={() => onOpenSensor(mapSensorRow(row))}
+                      primary={row.terminalId}
+                      secondary="—"
+                    />
+                  </li>
+                ))}
+              </ul>
+            </section>
           )}
         </div>
-        {silent.total === 0 ? (
-          <p className="text-sm text-gray-600 dark:text-gray-400">Toda la flota transmitiendo.</p>
-        ) : (
-          <ul className="divide-y divide-gray-100 rounded-lg border border-gray-100 dark:divide-slate-800 dark:border-slate-700">
-            {silent.items.map((row) => (
-              <li key={row.id}>
-                <DashboardListRow
-                  onClick={() => onOpenSensor(mapSensorRow(row))}
-                  primary={row.terminalId}
-                  secondary={row.owner?.email ?? '—'}
-                  tertiary={
-                    row.lastReadingAt ? formatLastReadingAgo(row.lastReadingAt) : '—'
-                  }
-                  tertiaryClassName="text-amber-700 dark:text-amber-300"
-                />
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {neverReported.total > 0 && (
-        <section className="mb-5">
-          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-gray-400" aria-hidden />
-              <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                Esperando primera lectura{' '}
-                <span className="font-normal text-gray-500 dark:text-gray-400">({neverReported.total})</span>
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => onApplySignalTableFilter('NEVER_REPORTED')}
-              className="text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-            >
-              Ver todos
-            </button>
-          </div>
-          <ul className="divide-y divide-gray-100 rounded-lg border border-gray-100 dark:divide-slate-800 dark:border-slate-700">
-            {neverReported.items.map((row) => (
-              <li key={row.id}>
-                <DashboardListRow
-                  onClick={() => onOpenSensor(mapSensorRow(row))}
-                  primary={row.terminalId}
-                  secondary={row.owner?.email ?? '—'}
-                />
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {unassigned.total > 0 && (
-        <section>
-          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-slate-400" aria-hidden />
-              <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                Sin asignar{' '}
-                <span className="font-normal text-gray-500 dark:text-gray-400">({unassigned.total})</span>
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => onApplyStatusTableFilter('UNASSIGNED')}
-              className="text-xs font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-            >
-              Ver todos
-            </button>
-          </div>
-          <ul className="divide-y divide-gray-100 rounded-lg border border-gray-100 dark:divide-slate-800 dark:border-slate-700">
-            {unassigned.items.map((row) => (
-              <li key={row.id}>
-                <DashboardListRow
-                  onClick={() => onOpenSensor(mapSensorRow(row))}
-                  primary={row.terminalId}
-                  secondary="—"
-                />
-              </li>
-            ))}
-          </ul>
-        </section>
       )}
     </div>
   )

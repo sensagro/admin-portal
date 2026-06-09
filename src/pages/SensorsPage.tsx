@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { PageSizeSelect } from '@/components/ui/PageSizeSelect'
@@ -7,11 +7,11 @@ import { DataTable } from '@/components/ui/DataTable'
 import { RegisterSensorsModal } from '@/components/sensors/RegisterSensorsModal'
 import { ManageSensorModal } from '@/components/sensors/ManageSensorModal'
 import { SensorConfirmModal } from '@/components/sensors/SensorConfirmModal'
-import { buildSensorColumns } from '@/components/sensors/sensorColumns'
+import { buildSensorColumns, typeLabels, statusBadge } from '@/components/sensors/sensorColumns'
 import { FleetSignalCard } from '@/components/sensors/FleetSignalCard'
 import { FlashOverlay } from '@/components/ui/FlashOverlay'
 import { useSensors } from '@/hooks/useSensors'
-import type { SensorSignalStatus, SensorStatus } from '@/types'
+import type { SensorSignalStatus, SensorStatus, SensorType } from '@/types'
 
 export function SensorsPage() {
   const [searchParams] = useSearchParams()
@@ -64,6 +64,46 @@ export function SensorsPage() {
     executeConfirmedAction,
   } = useSensors()
 
+  const [searchDraft, setSearchDraft] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [ownerDraft, setOwnerDraft] = useState('')
+  const [ownerQuery, setOwnerQuery] = useState('')
+  const [typeFilter, setTypeFilter] = useState<SensorType | ''>('')
+  const [statusFilterLocal, setStatusFilterLocal] = useState<SensorStatus | ''>('')
+
+  useEffect(() => {
+    const handle = window.setTimeout(() => setSearchQuery(searchDraft.trim()), 300)
+    return () => window.clearTimeout(handle)
+  }, [searchDraft])
+
+  useEffect(() => {
+    const handle = window.setTimeout(() => setOwnerQuery(ownerDraft.trim()), 300)
+    return () => window.clearTimeout(handle)
+  }, [ownerDraft])
+
+  const filteredRows = useMemo(() => {
+    const q = searchQuery.toLowerCase()
+    const oq = ownerQuery.toLowerCase()
+    return rows.filter((r) => {
+      if (q && !r.terminalId.toLowerCase().includes(q) && !r.name.toLowerCase().includes(q)) return false
+      if (oq && !(r.ownerEmail ?? '').toLowerCase().includes(oq)) return false
+      if (typeFilter && r.type !== typeFilter) return false
+      if (statusFilterLocal && r.status !== statusFilterLocal) return false
+      return true
+    })
+  }, [rows, searchQuery, ownerQuery, typeFilter, statusFilterLocal])
+
+  const hasLocalFilters = searchQuery || ownerQuery || typeFilter || statusFilterLocal
+
+  const clearLocalFilters = () => {
+    setSearchDraft('')
+    setSearchQuery('')
+    setOwnerDraft('')
+    setOwnerQuery('')
+    setTypeFilter('')
+    setStatusFilterLocal('')
+  }
+
   useEffect(() => {
     const sig = searchParams.get('signalStatus')
     const st = searchParams.get('status')
@@ -97,7 +137,7 @@ export function SensorsPage() {
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <PageHeader
           title="Sensores"
-          count={loading ? undefined : rows.length}
+          count={loading ? undefined : filteredRows.length}
           total={loading ? undefined : total ?? undefined}
           className="min-w-0"
         />
@@ -156,12 +196,74 @@ export function SensorsPage() {
         </div>
       )}
 
+      <div className="mb-4 flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <label className="flex flex-col gap-1 text-xs font-medium text-gray-600 dark:text-gray-400">
+            Terminal ID / Nombre
+            <input
+              type="text"
+              value={searchDraft}
+              onChange={(e) => setSearchDraft(e.target.value)}
+              placeholder="Buscar..."
+              className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-xs font-medium text-gray-600 dark:text-gray-400">
+            Propietario
+            <input
+              type="text"
+              value={ownerDraft}
+              onChange={(e) => setOwnerDraft(e.target.value)}
+              placeholder="correo@ejemplo.com"
+              className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-xs font-medium text-gray-600 dark:text-gray-400">
+            Tipo
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value as SensorType | '')}
+              className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100"
+            >
+              <option value="">Todos</option>
+              {(Object.entries(typeLabels) as [SensorType, string][]).map(([k, v]) => (
+                <option key={k} value={k}>{v}</option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-xs font-medium text-gray-600 dark:text-gray-400">
+            Estado
+            <select
+              value={statusFilterLocal}
+              onChange={(e) => setStatusFilterLocal(e.target.value as SensorStatus | '')}
+              className="rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-100"
+            >
+              <option value="">Todos</option>
+              {(Object.entries(statusBadge) as [SensorStatus, { label: string }][]).map(([k, v]) => (
+                <option key={k} value={k}>{v.label}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+        {hasLocalFilters && (
+          <div>
+            <button
+              type="button"
+              onClick={clearLocalFilters}
+              className="rounded-lg border border-gray-300 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-slate-600 dark:text-gray-200 dark:hover:bg-slate-800"
+            >
+              Limpiar filtros
+            </button>
+          </div>
+        )}
+      </div>
+
       <>
         <div className="rounded-xl border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-900">
           <DataTable
             isLoading={loading}
             columns={columns}
-            rows={rows}
+            rows={filteredRows}
             keyExtractor={(r) => r.id}
           />
         </div>
